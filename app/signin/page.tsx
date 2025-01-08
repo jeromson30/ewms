@@ -2,7 +2,6 @@
 import styles from "../page.module.css";
 import Header from "../components/header"
 import React, { useState, FormEvent  } from 'react';
-import { signIn } from '@/app/actions/signin'
 
 
 export function Signin() {
