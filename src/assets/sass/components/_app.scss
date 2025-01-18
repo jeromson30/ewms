@@ -1,0 +1,62 @@
+.App {
+    width: $PrimWidth;
+    @include flexBox(column);
+    font-family: "Nunito", serif;
+}
+
+.App-container {
+      width: 86.2%;
+      max-width: 1240px;
+}
+
+.App-logo {
+    width: 210px;
+    height: 68px;
+    pointer-events: none;
+}
+  
+.App-header {
+    width: 100%;
+    padding-top: 10px;
+    display: flex;
+    color: $PrimColor;
+    align-items: center;
+}
+  
+  .App-navigation {
+    display: flex;
+    width: 100%;
+    justify-content: end;
+    font-size: 16px;
+    font-weight: 300;
+    text-transform: uppercase;
+    color: #000;
+  }
+  
+  .App-navigation ul{
+    display: flex;
+    gap: 25px;
+  }
+  
+  .App-link-home, .App-link-about{
+    color: #fff;
+    text-decoration: none;
+  }
+  
+  .App-link-active {
+    text-decoration: none;
+  }
+  
+  .App-navigation a:hover{
+    text-decoration: underline;
+  }
+  
+  .App-link {
+    color: $PrimColor;
+  }
+  
+  .App-copyright {
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 34px;
+  }

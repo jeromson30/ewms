@@ -1,0 +1,65 @@
+:root{ 
+  --data-color-primary: #ffcc00; 
+  --data-color-secondary: #4b4b4b; 
+}
+
+#root {
+  background-image: linear-gradient(
+    45deg,
+    hsl(24deg 11% 17%) 0%,
+    hsl(26deg 12% 22%) 3%,
+    hsl(28deg 12% 27%) 9%,
+    hsl(30deg 12% 31%) 19%,
+    hsl(32deg 12% 36%) 35%,
+    hsl(34deg 12% 41%) 54%,
+    hsl(37deg 12% 46%) 68%,
+    hsl(39deg 12% 52%) 78%,
+    hsl(42deg 15% 57%) 85%,
+    hsl(44deg 18% 62%) 90%,
+    hsl(48deg 21% 67%) 94%,
+    hsl(51deg 26% 73%) 98%,
+    hsl(55deg 33% 78%) 100%
+  );
+  width: 100vw;
+  height: 100vh;
+  font-family: "Nunito", serif;
+  text-shadow: rgba($color: #fff, $alpha: 0.3) 0 0 15px;
+}
+
+body {
+    margin: 0;
+    font-weight: 500;
+    font-size: 18px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  code {
+    font-family: "Nunito", serif;
+  }
+  main {
+    @include flexBox(column);
+    width: 100%;
+    max-width: 1240px;
+    padding-top: 40px;
+    padding-bottom: 20px;
+  }
+  
+  footer {
+    @include flexBox(column);
+    padding-top: 40px;
+  }
+  
+  li {
+    list-style: none;
+  }
+  
+  .sr-only {
+    border: 0;
+    height: 1px;
+      overflow: hidden;
+      padding: 0;
+      position: absolute;
+      width: 1px;
+      white-space: nowrap;
+  }

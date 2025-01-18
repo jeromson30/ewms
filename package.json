@@ -1,31 +1,32 @@
 {
-  "name": "ewms",
-  "version": "0.1.0",
+  "name": "eswms",
   "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "dev": "next dev && nodemon ./backend/server.js",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "dev": "vite && npm run sass-dev",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "sass-dev": "sass --watch --update --style=expanded src/assets/sass:src/assets/css",
+    "sass-prod": "sass --no-source-map --style=compressed src/assets/sass:src/assets/css"
   },
   "dependencies": {
-<<<<<<< HEAD
-    "@radix-ui/react-navigation-menu": "^1.2.3",
-=======
->>>>>>> 43d5b57f99f79504d1c8e28428ae3bd3c656c251
-    "mongodb": "^6.12.0",
-    "mongoose": "^8.9.2",
-    "mongoose-unique-validator": "^4.0.1",
-    "next": "15.0.4",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^7.1.3",
+    "sass": "^1.83.4"
   },
   "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^8",
-    "eslint-config-next": "15.0.4",
-    "typescript": "^5"
+    "@eslint/js": "^9.17.0",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react-swc": "^3.5.0",
+    "eslint": "^9.17.0",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.16",
+    "globals": "^15.14.0",
+    "vite": "^6.0.5"
   }
 }

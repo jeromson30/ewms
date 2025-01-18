@@ -1,0 +1,289 @@
+@font-face {
+  font-family: "Montserrat";
+  src: url("../../fonts/Montserrat-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Montserrat";
+  src: url("../../fonts/Montserrat-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Montserrat";
+  src: url("../../fonts/Montserrat-Bold.ttf") format("truetype");
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Montserrat";
+  src: url("../../fonts/Montserrat-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Montserrat";
+  src: url("../../fonts/Montserrat-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Nunito";
+  src: url("../../fonts/Nunito-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Nunito";
+  src: url("../../fonts/Nunito-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Nunito";
+  src: url("../../fonts/Nunito-Bold.ttf") format("truetype");
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Nunito";
+  src: url("../../fonts/Nunito-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Nunito";
+  src: url("../../fonts/Nunito-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+:root {
+  --data-color-primary: #ffcc00;
+  --data-color-secondary: #4b4b4b;
+}
+
+#root {
+  background-image: linear-gradient(45deg, hsl(24, 11%, 17%) 0%, hsl(26, 12%, 22%) 3%, hsl(28, 12%, 27%) 9%, hsl(30, 12%, 31%) 19%, hsl(32, 12%, 36%) 35%, hsl(34, 12%, 41%) 54%, hsl(37, 12%, 46%) 68%, hsl(39, 12%, 52%) 78%, hsl(42, 15%, 57%) 85%, hsl(44, 18%, 62%) 90%, hsl(48, 21%, 67%) 94%, hsl(51, 26%, 73%) 98%, hsl(55, 33%, 78%) 100%);
+  width: 100vw;
+  height: 100vh;
+  font-family: "Nunito", serif;
+  text-shadow: rgba(255, 255, 255, 0.3) 0 0 15px;
+}
+
+body {
+  margin: 0;
+  font-weight: 500;
+  font-size: 18px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: "Nunito", serif;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 1240px;
+  padding-top: 40px;
+  padding-bottom: 20px;
+}
+
+footer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-top: 40px;
+}
+
+li {
+  list-style: none;
+}
+
+.sr-only {
+  border: 0;
+  height: 1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+  white-space: nowrap;
+}
+
+.App {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-family: "Nunito", serif;
+}
+
+.App-container {
+  width: 86.2%;
+  max-width: 1240px;
+}
+
+.App-logo {
+  width: 210px;
+  height: 68px;
+  pointer-events: none;
+}
+
+.App-header {
+  width: 100%;
+  padding-top: 10px;
+  display: flex;
+  color: #FF6060;
+  align-items: center;
+}
+
+.App-navigation {
+  display: flex;
+  width: 100%;
+  justify-content: end;
+  font-size: 16px;
+  font-weight: 300;
+  text-transform: uppercase;
+  color: #000;
+}
+
+.App-navigation ul {
+  display: flex;
+  gap: 25px;
+}
+
+.App-link-home, .App-link-about {
+  color: #fff;
+  text-decoration: none;
+}
+
+.App-link-active {
+  text-decoration: none;
+}
+
+.App-navigation a:hover {
+  text-decoration: underline;
+}
+
+.App-link {
+  color: #FF6060;
+}
+
+.App-copyright {
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 34px;
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inner-container {
+  position: relative;
+  width: 100%;
+  max-width: 1440px;
+  overflow: hidden;
+  mask-composite: intersect;
+  mask-image: linear-gradient(to right, transparent, black 7rem), linear-gradient(to left, transparent, black 7rem), linear-gradient(to bottom, transparent, black 7rem), linear-gradient(to top, transparent, black 7rem);
+}
+
+.scroll-grid {
+  margin: auto;
+  display: grid;
+  height: 250px;
+  width: 300px;
+  animation: skew-scroll 20s linear infinite;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1.25rem;
+}
+
+.scroll-grid.sm-grid-cols-2 {
+  width: 600px;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.tilted-grid-item {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.2);
+  gap: 0.5rem;
+  border-radius: 0.375rem;
+  border: 1px solid #222;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 4px 6px rgba(146, 146, 146, 0.1);
+  transition: 0.3s ease;
+}
+
+.tilted-grid-item:hover {
+  transform: translate(-0.25rem, -0.25rem) scale(1.025);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+}
+
+.tilted-grid-item.dark {
+  border-color: #fff;
+}
+
+.icon {
+  height: 1.5rem;
+  width: 1.5rem;
+  margin-right: 10px;
+}
+
+.item-text {
+  color: #fff;
+}
+
+@keyframes skew-scroll {
+  0% {
+    transform: rotateX(20deg) rotateZ(-20deg) skewX(20deg);
+  }
+  100% {
+    transform: rotateX(20deg) rotateZ(-20deg) skewX(20deg) translateY(-100%);
+  }
+}
+.App-pageerror-error {
+  color: #FF6060;
+  font-size: 288px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.App-pageerror-errortext {
+  color: #FF6060;
+  padding-bottom: 40px;
+}
+
+.App-pageerror-container {
+  height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: normal;
+  align-items: center;
+}
+
+.App-pageerror-link {
+  color: black;
+}
+
+/*# sourceMappingURL=main.css.map */
