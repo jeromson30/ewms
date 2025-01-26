@@ -1,15 +1,17 @@
 import { createBrowserRouter} from "react-router-dom";
-// import LogementPage from '../pages/LogementP';
-
 import Home from '../pages/Home';
-// import About from '../pages/About';
-
+import Login from '../pages/Login';
 import PageError from '../pages/pageError';
 
 const router = createBrowserRouter([
     {
       path: "/",
       element:  <Home />,
+      errorElement: <PageError />
+    },
+    {
+      path: "/login",
+      element:  <Login />,
       errorElement: <PageError />
     },
     // {

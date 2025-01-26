@@ -4,26 +4,13 @@
 }
 
 #root {
-  background-image: linear-gradient(
-    45deg,
-    hsl(24deg 11% 17%) 0%,
-    hsl(26deg 12% 22%) 3%,
-    hsl(28deg 12% 27%) 9%,
-    hsl(30deg 12% 31%) 19%,
-    hsl(32deg 12% 36%) 35%,
-    hsl(34deg 12% 41%) 54%,
-    hsl(37deg 12% 46%) 68%,
-    hsl(39deg 12% 52%) 78%,
-    hsl(42deg 15% 57%) 85%,
-    hsl(44deg 18% 62%) 90%,
-    hsl(48deg 21% 67%) 94%,
-    hsl(51deg 26% 73%) 98%,
-    hsl(55deg 33% 78%) 100%
-  );
+  background-size: 100% 100%;
+  background-position: 0px 0px,0px 0px,0px 0px,0px 0px,0px 0px;
+  background-image: radial-gradient(49% 81% at 45% 47%, #D1D1D145 0%, #073AFF00 100%),radial-gradient(113% 91% at 17% -2%, #CCC9C0FF 1%, #FF000000 99%),radial-gradient(142% 91% at 83% 7%, #E6DFC8FF 1%, #FF000000 99%),radial-gradient(142% 91% at -6% 74%, #B8B39DFF 1%, #FF000000 99%),radial-gradient(142% 91% at 111% 84%, #969696FF 0%, #000000FF 100%);
   width: 100vw;
   height: 100vh;
   font-family: "Nunito", serif;
-  text-shadow: rgba($color: #fff, $alpha: 0.3) 0 0 15px;
+  text-shadow: rgba($color: #000, $alpha: 0.1) 0 0 20px;
 }
 
 body {
@@ -32,6 +19,7 @@ body {
     font-size: 18px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    height: 100vh;
   }
 
   code {
@@ -48,6 +36,7 @@ body {
   footer {
     @include flexBox(column);
     padding-top: 40px;
+    color: $PrimColor;
   }
   
   li {

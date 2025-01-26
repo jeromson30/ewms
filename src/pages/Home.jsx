@@ -2,7 +2,7 @@ import Header from '../components/Header';
 // import Banner from "../components/Banner";
 // import Gallery from "../components/Gallery";
 // import image from "../assets/images/banner_slogan.webp";
-// import Footer from '../components/Footer';
+import Footer from '../components/Footer';
 import { useEffect } from 'react';
 import TiltedScroll from '../components/TiltedScroll';
 
@@ -18,8 +18,9 @@ function Home() {
                 <main>
                   <TiltedScroll/>
                 </main>
+                <Footer/>
             </div>
-            {/* <Footer/> */}
+            
         </div>
     )
   }

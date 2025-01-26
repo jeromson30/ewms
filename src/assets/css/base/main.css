@@ -74,11 +74,13 @@
 }
 
 #root {
-  background-image: linear-gradient(45deg, hsl(24, 11%, 17%) 0%, hsl(26, 12%, 22%) 3%, hsl(28, 12%, 27%) 9%, hsl(30, 12%, 31%) 19%, hsl(32, 12%, 36%) 35%, hsl(34, 12%, 41%) 54%, hsl(37, 12%, 46%) 68%, hsl(39, 12%, 52%) 78%, hsl(42, 15%, 57%) 85%, hsl(44, 18%, 62%) 90%, hsl(48, 21%, 67%) 94%, hsl(51, 26%, 73%) 98%, hsl(55, 33%, 78%) 100%);
+  background-size: 100% 100%;
+  background-position: 0px 0px, 0px 0px, 0px 0px, 0px 0px, 0px 0px;
+  background-image: radial-gradient(49% 81% at 45% 47%, rgba(209, 209, 209, 0.2705882353) 0%, rgba(7, 58, 255, 0) 100%), radial-gradient(113% 91% at 17% -2%, #ccc9c0 1%, rgba(255, 0, 0, 0) 99%), radial-gradient(142% 91% at 83% 7%, #e6dfc8 1%, rgba(255, 0, 0, 0) 99%), radial-gradient(142% 91% at -6% 74%, #b8b39d 1%, rgba(255, 0, 0, 0) 99%), radial-gradient(142% 91% at 111% 84%, #969696 0%, black 100%);
   width: 100vw;
   height: 100vh;
   font-family: "Nunito", serif;
-  text-shadow: rgba(255, 255, 255, 0.3) 0 0 15px;
+  text-shadow: rgba(0, 0, 0, 0.1) 0 0 20px;
 }
 
 body {
@@ -87,6 +89,7 @@ body {
   font-size: 18px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  height: 100vh;
 }
 
 code {
@@ -110,6 +113,7 @@ footer {
   justify-content: center;
   align-items: center;
   padding-top: 40px;
+  color: #FFF;
 }
 
 li {
@@ -133,11 +137,18 @@ li {
   justify-content: center;
   align-items: center;
   font-family: "Nunito", serif;
+  height: 100vh;
+}
+
+.App a {
+  color: #FFF;
+  text-decoration: none;
 }
 
 .App-container {
   width: 86.2%;
   max-width: 1240px;
+  height: 100vh;
 }
 
 .App-logo {
@@ -150,7 +161,7 @@ li {
   width: 100%;
   padding-top: 10px;
   display: flex;
-  color: #FF6060;
+  color: #FFF;
   align-items: center;
 }
 
@@ -161,7 +172,7 @@ li {
   font-size: 16px;
   font-weight: 300;
   text-transform: uppercase;
-  color: #000;
+  color: #FFF;
 }
 
 .App-navigation ul {
@@ -170,7 +181,7 @@ li {
 }
 
 .App-link-home, .App-link-about {
-  color: #fff;
+  color: #FFF;
   text-decoration: none;
 }
 
@@ -183,7 +194,15 @@ li {
 }
 
 .App-link {
-  color: #FF6060;
+  color: #FFF;
+}
+
+.App-login {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #FFF;
 }
 
 .App-copyright {
@@ -263,14 +282,14 @@ li {
   }
 }
 .App-pageerror-error {
-  color: #FF6060;
+  color: #FFF;
   font-size: 288px;
   font-weight: 700;
   margin: 0;
 }
 
 .App-pageerror-errortext {
-  color: #FF6060;
+  color: #FFF;
   padding-bottom: 40px;
 }
 
@@ -283,7 +302,7 @@ li {
 }
 
 .App-pageerror-link {
-  color: black;
+  color: #FFF;
 }
 
 /*# sourceMappingURL=main.css.map */

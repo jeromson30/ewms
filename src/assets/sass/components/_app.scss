@@ -2,11 +2,18 @@
     width: $PrimWidth;
     @include flexBox(column);
     font-family: "Nunito", serif;
+    height: 100vh;
+}
+
+.App a {
+  color: $PrimColor;
+  text-decoration: none;
 }
 
 .App-container {
       width: 86.2%;
       max-width: 1240px;
+      height: 100vh;
 }
 
 .App-logo {
@@ -30,7 +37,7 @@
     font-size: 16px;
     font-weight: 300;
     text-transform: uppercase;
-    color: #000;
+    color: $PrimColor;
   }
   
   .App-navigation ul{
@@ -39,7 +46,7 @@
   }
   
   .App-link-home, .App-link-about{
-    color: #fff;
+    color: $PrimColor;
     text-decoration: none;
   }
   
@@ -54,7 +61,15 @@
   .App-link {
     color: $PrimColor;
   }
-  
+
+  .App-login {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: $PrimColor;
+  }
+
   .App-copyright {
     font-size: 24px;
     font-weight: 500;

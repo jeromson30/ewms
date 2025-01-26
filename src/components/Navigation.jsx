@@ -22,6 +22,7 @@ function Navigation(){
         <li><a href="/" className="App-link-home">Fonctionnalites</a></li>
         <li><a href="/" className="App-link-home">Tarifs</a></li>
         <li><a href="/A-propos" className="App-link-about">A propos</a></li>
+        <li><a href="/login" className="App-connexion">Espace client</a></li>
       </ul>
     </nav>
   )
