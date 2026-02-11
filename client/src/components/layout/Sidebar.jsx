@@ -47,9 +47,13 @@ export default function Sidebar() {
         </div>
 
         <nav className="sidebar-nav">
-          <NavLink to="/" className="sidebar-link" onClick={() => setMobileOpen(false)}>
+          <NavLink to="/" className="sidebar-link" onClick={() => setMobileOpen(false)} end>
             <LayoutDashboard size={18} />
             Tableau de bord
+          </NavLink>
+          <NavLink to="/planning" className="sidebar-link" onClick={() => setMobileOpen(false)}>
+            <CalendarDays size={18} />
+            Planning global
           </NavLink>
         </nav>
 

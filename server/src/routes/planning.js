@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import {
+  getGlobalPlanning,
   getPlanning, addEvent, updateEvent, deleteEvent,
   addOnCall, updateOnCall, deleteOnCall,
 } from '../controllers/planningController.js';
@@ -9,6 +10,7 @@ const router = Router();
 
 router.use(authenticate);
 
+router.get('/global/all', getGlobalPlanning);
 router.get('/:projectId', getPlanning);
 router.post('/:projectId/events', addEvent);
 router.put('/:projectId/events/:eventId', updateEvent);

@@ -1,0 +1,22 @@
+.global-filter-select {
+  font-size: 0.85rem;
+  padding: 0.4rem 2.2rem 0.4rem 0.75rem;
+  min-width: 180px;
+}
+
+.global-event {
+  position: relative;
+}
+
+.global-project-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.global-project-badge:hover {
+  opacity: 0.8;
+}
