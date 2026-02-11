@@ -1,44 +1,37 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Columns3, CalendarDays, Users, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
-import api from '../services/api.js';
+import { useProjects } from '../context/ProjectContext.jsx';
 import './DashboardPage.css';
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const { projects, createProject, deleteProject } = useProjects();
   const navigate = useNavigate();
-  const [projects, setProjects] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ name: '', description: '', color: '#6366f1' });
-
-  useEffect(() => {
-    loadProjects();
-  }, []);
-
-  const loadProjects = async () => {
-    try {
-      const res = await api.get('/projects');
-      setProjects(res.data);
-    } catch { /* handled */ }
-  };
 
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/projects', form);
+      await createProject(form);
       setForm({ name: '', description: '', color: '#6366f1' });
       setShowModal(false);
-      loadProjects();
     } catch { /* handled */ }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm('Supprimer ce projet ?')) return;
     try {
-      await api.delete(`/projects/${id}`);
-      loadProjects();
+      await deleteProject(id);
     } catch { /* handled */ }
+  };
+
+  const canDelete = (project) => {
+    const isOwner = project.owner?._id === user?.id || project.owner === user?.id;
+    const member = project.members?.find(m => (m.user?._id || m.user) === user?.id);
+    return isOwner || member?.role === 'admin' || user?.role === 'admin' || user?.role === 'manager';
   };
 
   const colors = ['#6366f1', '#0ea5e9', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#8b5cf6', '#14b8a6'];
@@ -47,7 +40,7 @@ export default function DashboardPage() {
     <div className="dashboard">
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">Bonjour, {user?.name?.split(' ')[0]}</h1>
+          <h1 className="dashboard-title">Bonjour, {user?.firstName}</h1>
           <p className="text-secondary">Gérez vos projets et votre équipe</p>
         </div>
         <button className="btn btn-primary" onClick={() => setShowModal(true)}>
@@ -62,9 +55,11 @@ export default function DashboardPage() {
             <div className="project-card-header">
               <div className="project-card-dot" style={{ background: project.color }} />
               <h3 className="project-card-name">{project.name}</h3>
-              <button className="btn-icon btn-ghost" onClick={() => handleDelete(project._id)}>
-                <Trash2 size={14} />
-              </button>
+              {canDelete(project) && (
+                <button className="btn-icon btn-ghost" onClick={() => handleDelete(project._id)}>
+                  <Trash2 size={14} />
+                </button>
+              )}
             </div>
             {project.description && (
               <p className="project-card-desc">{project.description}</p>

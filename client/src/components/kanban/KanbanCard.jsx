@@ -71,8 +71,8 @@ export default function KanbanCard({ card, isDragging, onClick }) {
         {card.assignees?.length > 0 && (
           <div className="kanban-card-assignees">
             {card.assignees.slice(0, 3).map((a, i) => (
-              <div key={i} className="avatar avatar-sm" title={a.name}>
-                {a.name?.[0]?.toUpperCase() || '?'}
+              <div key={i} className="avatar avatar-sm" title={`${a.firstName} ${a.lastName}`}>
+                {a.firstName?.[0]?.toUpperCase() || '?'}
               </div>
             ))}
           </div>

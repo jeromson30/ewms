@@ -1,28 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Columns3, CalendarDays, Plus, LogOut, FolderKanban, Menu, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
-import api from '../../services/api.js';
+import { useProjects } from '../../context/ProjectContext.jsx';
 import './Sidebar.css';
 
 export default function Sidebar() {
   const { user, logout } = useAuth();
+  const { projects, createProject } = useProjects();
   const navigate = useNavigate();
-  const [projects, setProjects] = useState([]);
   const [showNew, setShowNew] = useState(false);
   const [newName, setNewName] = useState('');
   const [mobileOpen, setMobileOpen] = useState(false);
-
-  useEffect(() => {
-    api.get('/projects').then((res) => setProjects(res.data)).catch(() => {});
-  }, []);
 
   const handleCreateProject = async (e) => {
     e.preventDefault();
     if (!newName.trim()) return;
     try {
-      const res = await api.post('/projects', { name: newName });
-      setProjects([...projects, res.data]);
+      await createProject({ name: newName });
       setNewName('');
       setShowNew(false);
     } catch { /* handled by interceptor */ }
@@ -33,7 +28,7 @@ export default function Sidebar() {
     navigate('/login');
   };
 
-  const initials = user?.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?';
+  const initials = ((user?.firstName?.[0] || '') + (user?.lastName?.[0] || '')).toUpperCase() || '?';
 
   return (
     <>
@@ -47,9 +42,13 @@ export default function Sidebar() {
         </div>
 
         <nav className="sidebar-nav">
-          <NavLink to="/" className="sidebar-link" onClick={() => setMobileOpen(false)}>
+          <NavLink to="/" className="sidebar-link" onClick={() => setMobileOpen(false)} end>
             <LayoutDashboard size={18} />
             Tableau de bord
+          </NavLink>
+          <NavLink to="/planning" className="sidebar-link" onClick={() => setMobileOpen(false)}>
+            <CalendarDays size={18} />
+            Planning global
           </NavLink>
         </nav>
 
@@ -110,7 +109,7 @@ export default function Sidebar() {
           <div className="sidebar-user">
             <div className="avatar avatar-sm">{initials}</div>
             <div className="sidebar-user-info">
-              <span className="sidebar-user-name">{user?.name}</span>
+              <span className="sidebar-user-name">{user?.firstName} {user?.lastName}</span>
               <span className="sidebar-user-role">{user?.role}</span>
             </div>
           </div>

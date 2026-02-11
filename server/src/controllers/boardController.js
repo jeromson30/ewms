@@ -3,7 +3,7 @@ import Board from '../models/Board.js';
 export const getBoard = async (req, res) => {
   try {
     const board = await Board.findOne({ project: req.params.projectId })
-      .populate('columns.cards.assignees', 'name email avatar');
+      .populate('columns.cards.assignees', 'firstName lastName email avatar');
 
     if (!board) {
       const newBoard = await Board.create({
@@ -91,7 +91,7 @@ export const addCard = async (req, res) => {
     });
     await board.save();
 
-    await board.populate('columns.cards.assignees', 'name email avatar');
+    await board.populate('columns.cards.assignees', 'firstName lastName email avatar');
     res.json(board);
   } catch (error) {
     res.status(500).json({ message: 'Erreur serveur.', error: error.message });
@@ -112,7 +112,7 @@ export const updateCard = async (req, res) => {
     Object.assign(card, req.body);
     await board.save();
 
-    await board.populate('columns.cards.assignees', 'name email avatar');
+    await board.populate('columns.cards.assignees', 'firstName lastName email avatar');
     res.json(board);
   } catch (error) {
     res.status(500).json({ message: 'Erreur serveur.', error: error.message });
@@ -159,7 +159,7 @@ export const moveCard = async (req, res) => {
     targetColumn.cards.forEach((c, i) => { c.position = i; });
 
     await board.save();
-    await board.populate('columns.cards.assignees', 'name email avatar');
+    await board.populate('columns.cards.assignees', 'firstName lastName email avatar');
 
     res.json(board);
   } catch (error) {

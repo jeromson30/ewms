@@ -7,7 +7,8 @@ import { validate } from '../middleware/validate.js';
 const router = Router();
 
 router.post('/register', [
-  body('name').trim().notEmpty().withMessage('Le nom est requis'),
+  body('firstName').trim().notEmpty().withMessage('Le prénom est requis'),
+  body('lastName').trim().notEmpty().withMessage('Le nom est requis'),
   body('email').isEmail().withMessage('Email invalide'),
   body('password').isLength({ min: 6 }).withMessage('Le mot de passe doit contenir au moins 6 caractères'),
   validate,

@@ -192,7 +192,7 @@ export default function PlanningPage() {
                         style={{ background: onCallTypeConfig[oc.type]?.color || '#f59e0b' }}
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <Phone size={8} /> {oc.user?.name?.split(' ')[0] || 'Astreinte'}
+                        <Phone size={8} /> {oc.user?.firstName || 'Astreinte'}
                       </div>
                     ))}
                     {events.slice(0, 2).map(ev => (
@@ -233,10 +233,10 @@ export default function PlanningPage() {
                   <div className="oncall-card-header">
                     <div className="flex items-center gap-2">
                       <div className="avatar avatar-sm">
-                        {oc.user?.name?.[0]?.toUpperCase() || '?'}
+                        {oc.user?.firstName?.[0]?.toUpperCase() || '?'}
                       </div>
                       <div>
-                        <p className="font-semibold text-sm">{oc.user?.name || 'Utilisateur'}</p>
+                        <p className="font-semibold text-sm">{oc.user ? `${oc.user.firstName} ${oc.user.lastName}` : 'Utilisateur'}</p>
                         <span className="badge" style={{ background: `${config.color}20`, color: config.color }}>
                           {config.label}
                         </span>
@@ -356,7 +356,7 @@ export default function PlanningPage() {
                   onChange={e => setOnCallForm({ ...onCallForm, user: e.target.value })}>
                   <option value="">Sélectionner...</option>
                   {users.map(u => (
-                    <option key={u._id} value={u._id}>{u.name}</option>
+                    <option key={u._id} value={u._id}>{u.firstName} {u.lastName}</option>
                   ))}
                 </select>
               </div>
