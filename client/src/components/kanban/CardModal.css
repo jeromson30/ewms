@@ -1,0 +1,12 @@
+.card-modal {
+  max-width: 550px;
+}
+
+.card-modal-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.card-modal .select {
+  background-color: var(--bg-input);
+}
