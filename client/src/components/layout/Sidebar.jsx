@@ -33,7 +33,7 @@ export default function Sidebar() {
     navigate('/login');
   };
 
-  const initials = user?.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?';
+  const initials = ((user?.firstName?.[0] || '') + (user?.lastName?.[0] || '')).toUpperCase() || '?';
 
   return (
     <>
@@ -110,7 +110,7 @@ export default function Sidebar() {
           <div className="sidebar-user">
             <div className="avatar avatar-sm">{initials}</div>
             <div className="sidebar-user-info">
-              <span className="sidebar-user-name">{user?.name}</span>
+              <span className="sidebar-user-name">{user?.firstName} {user?.lastName}</span>
               <span className="sidebar-user-role">{user?.role}</span>
             </div>
           </div>

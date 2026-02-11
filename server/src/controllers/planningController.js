@@ -3,8 +3,8 @@ import Planning from '../models/Planning.js';
 export const getPlanning = async (req, res) => {
   try {
     let planning = await Planning.findOne({ project: req.params.projectId })
-      .populate('events.assignees', 'name email avatar')
-      .populate('onCallSchedule.user', 'name email avatar');
+      .populate('events.assignees', 'firstName lastName email avatar')
+      .populate('onCallSchedule.user', 'firstName lastName email avatar');
 
     if (!planning) {
       planning = await Planning.create({
@@ -27,7 +27,7 @@ export const addEvent = async (req, res) => {
 
     planning.events.push(req.body);
     await planning.save();
-    await planning.populate('events.assignees', 'name email avatar');
+    await planning.populate('events.assignees', 'firstName lastName email avatar');
 
     res.json(planning);
   } catch (error) {
@@ -45,7 +45,7 @@ export const updateEvent = async (req, res) => {
 
     Object.assign(event, req.body);
     await planning.save();
-    await planning.populate('events.assignees', 'name email avatar');
+    await planning.populate('events.assignees', 'firstName lastName email avatar');
 
     res.json(planning);
   } catch (error) {
@@ -74,7 +74,7 @@ export const addOnCall = async (req, res) => {
 
     planning.onCallSchedule.push(req.body);
     await planning.save();
-    await planning.populate('onCallSchedule.user', 'name email avatar');
+    await planning.populate('onCallSchedule.user', 'firstName lastName email avatar');
 
     res.json(planning);
   } catch (error) {
@@ -92,7 +92,7 @@ export const updateOnCall = async (req, res) => {
 
     Object.assign(onCall, req.body);
     await planning.save();
-    await planning.populate('onCallSchedule.user', 'name email avatar');
+    await planning.populate('onCallSchedule.user', 'firstName lastName email avatar');
 
     res.json(planning);
   } catch (error) {

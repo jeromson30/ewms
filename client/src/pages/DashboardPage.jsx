@@ -47,7 +47,7 @@ export default function DashboardPage() {
     <div className="dashboard">
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">Bonjour, {user?.name?.split(' ')[0]}</h1>
+          <h1 className="dashboard-title">Bonjour, {user?.firstName}</h1>
           <p className="text-secondary">Gérez vos projets et votre équipe</p>
         </div>
         <button className="btn btn-primary" onClick={() => setShowModal(true)}>

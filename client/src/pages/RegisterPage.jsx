@@ -6,7 +6,8 @@ import './AuthPage.css';
 
 export default function RegisterPage() {
   const { register } = useAuth();
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -17,7 +18,7 @@ export default function RegisterPage() {
     setError('');
     setLoading(true);
     try {
-      await register(name, email, password);
+      await register(firstName, lastName, email, password);
     } catch (err) {
       setError(err.response?.data?.message || "Erreur lors de l'inscription");
     } finally {
@@ -37,16 +38,29 @@ export default function RegisterPage() {
         {error && <div className="auth-error">{error}</div>}
 
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label className="form-label">Nom complet</label>
-            <div className="input-icon-wrapper">
-              <User size={16} className="input-icon" />
+          <div className="auth-name-row">
+            <div className="form-group">
+              <label className="form-label">Prénom</label>
+              <div className="input-icon-wrapper">
+                <User size={16} className="input-icon" />
+                <input
+                  className="input input-with-icon"
+                  type="text"
+                  placeholder="Prénom"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Nom</label>
               <input
-                className="input input-with-icon"
+                className="input"
                 type="text"
-                placeholder="Votre nom"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                placeholder="Nom"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
                 required
               />
             </div>

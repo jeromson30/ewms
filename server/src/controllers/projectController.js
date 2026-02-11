@@ -7,7 +7,7 @@ export const getProjects = async (req, res) => {
         { owner: req.user._id },
         { 'members.user': req.user._id },
       ],
-    }).populate('owner', 'name email avatar').populate('members.user', 'name email avatar');
+    }).populate('owner', 'firstName lastName email avatar').populate('members.user', 'firstName lastName email avatar');
 
     res.json(projects);
   } catch (error) {
@@ -27,8 +27,8 @@ export const createProject = async (req, res) => {
       members: [{ user: req.user._id, role: 'admin' }],
     });
 
-    await project.populate('owner', 'name email avatar');
-    await project.populate('members.user', 'name email avatar');
+    await project.populate('owner', 'firstName lastName email avatar');
+    await project.populate('members.user', 'firstName lastName email avatar');
 
     res.status(201).json(project);
   } catch (error) {
@@ -42,7 +42,7 @@ export const updateProject = async (req, res) => {
       { _id: req.params.id, owner: req.user._id },
       req.body,
       { new: true, runValidators: true },
-    ).populate('owner', 'name email avatar').populate('members.user', 'name email avatar');
+    ).populate('owner', 'firstName lastName email avatar').populate('members.user', 'firstName lastName email avatar');
 
     if (!project) {
       return res.status(404).json({ message: 'Projet non trouvé.' });
@@ -84,7 +84,7 @@ export const addMember = async (req, res) => {
 
     project.members.push({ user: userId, role: role || 'member' });
     await project.save();
-    await project.populate('members.user', 'name email avatar');
+    await project.populate('members.user', 'firstName lastName email avatar');
 
     res.json(project);
   } catch (error) {
