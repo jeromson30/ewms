@@ -56,12 +56,21 @@ export const updateProject = async (req, res) => {
 
 export const deleteProject = async (req, res) => {
   try {
-    const project = await Project.findOneAndDelete({ _id: req.params.id, owner: req.user._id });
+    const project = await Project.findById(req.params.id);
 
     if (!project) {
       return res.status(404).json({ message: 'Projet non trouvé.' });
     }
 
+    const isOwner = project.owner.toString() === req.user._id.toString();
+    const member = project.members.find(m => m.user.toString() === req.user._id.toString());
+    const isAdminOrManager = member && (member.role === 'admin') || req.user.role === 'admin' || req.user.role === 'manager';
+
+    if (!isOwner && !isAdminOrManager) {
+      return res.status(403).json({ message: "Seuls les administrateurs et managers peuvent supprimer un projet." });
+    }
+
+    await Project.findByIdAndDelete(req.params.id);
     res.json({ message: 'Projet supprimé.' });
   } catch (error) {
     res.status(500).json({ message: 'Erreur serveur.', error: error.message });

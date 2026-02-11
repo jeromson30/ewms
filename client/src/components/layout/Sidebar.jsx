@@ -1,28 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Columns3, CalendarDays, Plus, LogOut, FolderKanban, Menu, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
-import api from '../../services/api.js';
+import { useProjects } from '../../context/ProjectContext.jsx';
 import './Sidebar.css';
 
 export default function Sidebar() {
   const { user, logout } = useAuth();
+  const { projects, createProject } = useProjects();
   const navigate = useNavigate();
-  const [projects, setProjects] = useState([]);
   const [showNew, setShowNew] = useState(false);
   const [newName, setNewName] = useState('');
   const [mobileOpen, setMobileOpen] = useState(false);
-
-  useEffect(() => {
-    api.get('/projects').then((res) => setProjects(res.data)).catch(() => {});
-  }, []);
 
   const handleCreateProject = async (e) => {
     e.preventDefault();
     if (!newName.trim()) return;
     try {
-      const res = await api.post('/projects', { name: newName });
-      setProjects([...projects, res.data]);
+      await createProject({ name: newName });
       setNewName('');
       setShowNew(false);
     } catch { /* handled by interceptor */ }
