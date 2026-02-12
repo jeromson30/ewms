@@ -52,6 +52,10 @@ const eventSchema = new mongoose.Schema({
     default: 'other',
   },
   assignees: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  },
   color: {
     type: String,
     default: '#6366f1',

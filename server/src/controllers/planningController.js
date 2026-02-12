@@ -10,6 +10,7 @@ export const getGlobalPlanning = async (req, res) => {
     const plannings = await Planning.find({ project: { $in: projectIds } })
       .populate('project', 'name color')
       .populate('events.assignees', 'firstName lastName email avatar')
+      .populate('events.createdBy', 'firstName lastName email')
       .populate('onCallSchedule.user', 'firstName lastName email avatar');
 
     const allEvents = [];
@@ -40,6 +41,7 @@ export const getPlanning = async (req, res) => {
   try {
     let planning = await Planning.findOne({ project: req.params.projectId })
       .populate('events.assignees', 'firstName lastName email avatar')
+      .populate('events.createdBy', 'firstName lastName email')
       .populate('onCallSchedule.user', 'firstName lastName email avatar');
 
     if (!planning) {
@@ -61,9 +63,10 @@ export const addEvent = async (req, res) => {
     const planning = await Planning.findOne({ project: req.params.projectId });
     if (!planning) return res.status(404).json({ message: 'Planning non trouvé.' });
 
-    planning.events.push(req.body);
+    planning.events.push({ ...req.body, createdBy: req.user._id });
     await planning.save();
     await planning.populate('events.assignees', 'firstName lastName email avatar');
+    await planning.populate('events.createdBy', 'firstName lastName email');
 
     res.json(planning);
   } catch (error) {
@@ -79,9 +82,17 @@ export const updateEvent = async (req, res) => {
     const event = planning.events.id(req.params.eventId);
     if (!event) return res.status(404).json({ message: 'Événement non trouvé.' });
 
-    Object.assign(event, req.body);
+    const isCreator = event.createdBy?.toString() === req.user._id.toString();
+    const isAdminOrManager = req.user.role === 'admin' || req.user.role === 'manager';
+    if (!isCreator && !isAdminOrManager) {
+      return res.status(403).json({ message: 'Vous n\'avez pas les droits pour modifier cet événement.' });
+    }
+
+    const { createdBy, ...updates } = req.body;
+    Object.assign(event, updates);
     await planning.save();
     await planning.populate('events.assignees', 'firstName lastName email avatar');
+    await planning.populate('events.createdBy', 'firstName lastName email');
 
     res.json(planning);
   } catch (error) {
@@ -93,6 +104,15 @@ export const deleteEvent = async (req, res) => {
   try {
     const planning = await Planning.findOne({ project: req.params.projectId });
     if (!planning) return res.status(404).json({ message: 'Planning non trouvé.' });
+
+    const event = planning.events.id(req.params.eventId);
+    if (!event) return res.status(404).json({ message: 'Événement non trouvé.' });
+
+    const isCreator = event.createdBy?.toString() === req.user._id.toString();
+    const isAdminOrManager = req.user.role === 'admin' || req.user.role === 'manager';
+    if (!isCreator && !isAdminOrManager) {
+      return res.status(403).json({ message: 'Vous n\'avez pas les droits pour supprimer cet événement.' });
+    }
 
     planning.events.pull(req.params.eventId);
     await planning.save();

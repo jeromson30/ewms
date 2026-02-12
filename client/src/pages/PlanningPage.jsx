@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Plus, ChevronLeft, ChevronRight, Phone, Calendar, Clock, Trash2, X } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, Phone, Calendar, Clock, Trash2, X, Pencil } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, addMonths, subMonths, isSameMonth, isSameDay, isWithinInterval, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { useAuth } from '../context/AuthContext.jsx';
 import api from '../services/api.js';
 import './PlanningPage.css';
 
@@ -22,11 +23,14 @@ const onCallTypeConfig = {
 
 export default function PlanningPage() {
   const { projectId } = useParams();
+  const { user } = useAuth();
   const [planning, setPlanning] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   const [showEventModal, setShowEventModal] = useState(false);
   const [showOnCallModal, setShowOnCallModal] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [editMode, setEditMode] = useState(false);
   const [users, setUsers] = useState([]);
   const [activeTab, setActiveTab] = useState('calendar');
 
@@ -51,6 +55,11 @@ export default function PlanningPage() {
     } catch { /* handled */ }
   };
 
+  const canEditEvent = (ev) => {
+    const isCreator = ev.createdBy?._id === user?.id || ev.createdBy === user?.id;
+    return isCreator || user?.role === 'admin' || user?.role === 'manager';
+  };
+
   const handleAddEvent = async (e) => {
     e.preventDefault();
     try {
@@ -61,10 +70,23 @@ export default function PlanningPage() {
     } catch { /* handled */ }
   };
 
+  const handleUpdateEvent = async (e) => {
+    e.preventDefault();
+    try {
+      await api.put(`/planning/${projectId}/events/${selectedEvent._id}`, eventForm);
+      loadPlanning();
+      setSelectedEvent(null);
+      setEditMode(false);
+    } catch { /* handled */ }
+  };
+
   const handleDeleteEvent = async (eventId) => {
+    if (!window.confirm('Supprimer cet événement ?')) return;
     try {
       await api.delete(`/planning/${projectId}/events/${eventId}`);
       loadPlanning();
+      setSelectedEvent(null);
+      setEditMode(false);
     } catch { /* handled */ }
   };
 
@@ -83,6 +105,28 @@ export default function PlanningPage() {
       await api.delete(`/planning/${projectId}/oncall/${onCallId}`);
       loadPlanning();
     } catch { /* handled */ }
+  };
+
+  const openEventDetail = (ev, e) => {
+    e.stopPropagation();
+    setSelectedEvent(ev);
+    setEditMode(false);
+    const startStr = ev.startDate ? format(parseISO(ev.startDate), "yyyy-MM-dd'T'HH:mm") : '';
+    const endStr = ev.endDate ? format(parseISO(ev.endDate), "yyyy-MM-dd'T'HH:mm") : '';
+    setEventForm({
+      title: ev.title,
+      description: ev.description || '',
+      startDate: startStr,
+      endDate: endStr,
+      allDay: ev.allDay || false,
+      type: ev.type || 'other',
+      color: ev.color || '#6366f1',
+    });
+  };
+
+  const closeEventDetail = () => {
+    setSelectedEvent(null);
+    setEditMode(false);
   };
 
   // Calendar rendering
@@ -120,7 +164,7 @@ export default function PlanningPage() {
 
   const openNewEventForDate = (date) => {
     const dateStr = format(date, 'yyyy-MM-dd');
-    setEventForm(f => ({ ...f, startDate: dateStr, endDate: dateStr }));
+    setEventForm({ title: '', description: '', startDate: dateStr, endDate: dateStr, allDay: false, type: 'other', color: '#6366f1' });
     setSelectedDate(date);
     setShowEventModal(true);
   };
@@ -198,9 +242,9 @@ export default function PlanningPage() {
                     {events.slice(0, 2).map(ev => (
                       <div
                         key={ev._id}
-                        className="calendar-event"
+                        className="calendar-event calendar-event-clickable"
                         style={{ background: eventTypeConfig[ev.type]?.color || ev.color }}
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => openEventDetail(ev, e)}
                       >
                         {ev.title}
                       </div>
@@ -271,7 +315,7 @@ export default function PlanningPage() {
             .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))
             .slice(0, 5)
             .map(ev => (
-              <div key={ev._id} className="upcoming-event">
+              <div key={ev._id} className="upcoming-event upcoming-event-clickable" onClick={(e) => openEventDetail(ev, e)}>
                 <div className="upcoming-event-dot" style={{ background: eventTypeConfig[ev.type]?.color || ev.color }} />
                 <div className="upcoming-event-info">
                   <p className="text-sm font-semibold">{ev.title}</p>
@@ -279,9 +323,6 @@ export default function PlanningPage() {
                     {format(parseISO(ev.startDate), 'dd MMM yyyy', { locale: fr })}
                   </p>
                 </div>
-                <button className="btn-icon btn-ghost" onClick={() => handleDeleteEvent(ev._id)}>
-                  <Trash2 size={12} />
-                </button>
               </div>
             ))}
           {planning.events.filter(ev => new Date(ev.startDate) >= new Date()).length === 0 && (
@@ -290,7 +331,97 @@ export default function PlanningPage() {
         </div>
       )}
 
-      {/* Event Modal */}
+      {/* Event Detail / Edit Modal */}
+      {selectedEvent && (
+        <div className="modal-overlay" onClick={closeEventDetail}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>{editMode ? 'Modifier l\'événement' : selectedEvent.title}</h3>
+              <button className="btn-icon btn-ghost" onClick={closeEventDetail}><X size={18} /></button>
+            </div>
+
+            {editMode ? (
+              <form onSubmit={handleUpdateEvent}>
+                <div className="form-group">
+                  <label className="form-label">Titre</label>
+                  <input className="input" required value={eventForm.title}
+                    onChange={e => setEventForm({ ...eventForm, title: e.target.value })} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Description</label>
+                  <textarea className="input textarea" value={eventForm.description}
+                    onChange={e => setEventForm({ ...eventForm, description: e.target.value })} />
+                </div>
+                <div className="flex gap-3">
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label className="form-label">Début</label>
+                    <input className="input" type="datetime-local" required value={eventForm.startDate}
+                      onChange={e => setEventForm({ ...eventForm, startDate: e.target.value })} />
+                  </div>
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label className="form-label">Fin</label>
+                    <input className="input" type="datetime-local" required value={eventForm.endDate}
+                      onChange={e => setEventForm({ ...eventForm, endDate: e.target.value })} />
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Type</label>
+                  <select className="input select" value={eventForm.type}
+                    onChange={e => setEventForm({ ...eventForm, type: e.target.value })}>
+                    <option value="meeting">Réunion</option>
+                    <option value="deadline">Deadline</option>
+                    <option value="milestone">Jalon</option>
+                    <option value="oncall">Astreinte</option>
+                    <option value="other">Autre</option>
+                  </select>
+                </div>
+                <div className="modal-actions">
+                  <button type="button" className="btn btn-secondary" onClick={() => setEditMode(false)}>Annuler</button>
+                  <button type="submit" className="btn btn-primary">Enregistrer</button>
+                </div>
+              </form>
+            ) : (
+              <div className="event-detail">
+                <div className="event-detail-row">
+                  <span className="badge" style={{ background: `${eventTypeConfig[selectedEvent.type]?.color || '#64748b'}20`, color: eventTypeConfig[selectedEvent.type]?.color || '#64748b' }}>
+                    {eventTypeConfig[selectedEvent.type]?.label || 'Autre'}
+                  </span>
+                </div>
+                {selectedEvent.description && (
+                  <p className="event-detail-desc">{selectedEvent.description}</p>
+                )}
+                <div className="event-detail-row">
+                  <Clock size={14} className="text-muted" />
+                  <span className="text-sm">
+                    {format(parseISO(selectedEvent.startDate), 'dd MMM yyyy HH:mm', { locale: fr })}
+                    {' — '}
+                    {format(parseISO(selectedEvent.endDate), 'dd MMM yyyy HH:mm', { locale: fr })}
+                  </span>
+                </div>
+                {selectedEvent.createdBy && (
+                  <div className="event-detail-row">
+                    <span className="text-sm text-muted">
+                      Créé par {selectedEvent.createdBy.firstName} {selectedEvent.createdBy.lastName}
+                    </span>
+                  </div>
+                )}
+                {canEditEvent(selectedEvent) && (
+                  <div className="modal-actions">
+                    <button className="btn btn-danger btn-sm" onClick={() => handleDeleteEvent(selectedEvent._id)}>
+                      <Trash2 size={14} /> Supprimer
+                    </button>
+                    <button className="btn btn-primary btn-sm" onClick={() => setEditMode(true)}>
+                      <Pencil size={14} /> Modifier
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* New Event Modal */}
       {showEventModal && (
         <div className="modal-overlay" onClick={() => setShowEventModal(false)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
