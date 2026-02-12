@@ -17,6 +17,10 @@ export const getProjects = async (req, res) => {
 
 export const createProject = async (req, res) => {
   try {
+    if (req.user.role === 'member') {
+      return res.status(403).json({ message: 'Seuls les administrateurs et managers peuvent créer un projet.' });
+    }
+
     const { name, description, color } = req.body;
 
     const project = await Project.create({
