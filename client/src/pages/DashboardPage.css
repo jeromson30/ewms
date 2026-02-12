@@ -118,3 +118,125 @@
 .color-swatch:hover {
   transform: scale(1.1);
 }
+
+/* Planning summary */
+.planning-summary {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.planning-summary-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+  color: var(--color-primary);
+}
+
+.planning-summary-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.planning-summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.planning-summary-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--border-radius-sm);
+  background: var(--bg-primary);
+  border: 1px solid transparent;
+  transition: var(--transition);
+}
+
+.planning-summary-item:hover {
+  border-color: var(--border-color);
+}
+
+.planning-summary-item.is-today {
+  border-left: 3px solid var(--color-warning);
+  background: rgba(245, 158, 11, 0.06);
+}
+
+.planning-summary-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.planning-summary-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.planning-summary-event-title {
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.planning-summary-project {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: var(--bg-tertiary);
+  padding: 0.1rem 0.5rem;
+  border-radius: 9999px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.planning-summary-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
+  flex-shrink: 0;
+}
+
+.planning-summary-date {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.planning-summary-date.today {
+  color: var(--color-warning);
+}
+
+.planning-summary-time {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.planning-summary-more {
+  align-self: center;
+  margin-top: 0.25rem;
+}
+
+@media (max-width: 768px) {
+  .planning-summary-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+  }
+}

@@ -7,6 +7,7 @@ import DashboardPage from './pages/DashboardPage.jsx';
 import KanbanPage from './pages/KanbanPage.jsx';
 import PlanningPage from './pages/PlanningPage.jsx';
 import GlobalPlanningPage from './pages/GlobalPlanningPage.jsx';
+import AdminPage from './pages/AdminPage.jsx';
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
@@ -30,6 +31,7 @@ export default function App() {
         <Route path="/planning" element={<GlobalPlanningPage />} />
         <Route path="/project/:projectId/kanban" element={<KanbanPage />} />
         <Route path="/project/:projectId/planning" element={<PlanningPage />} />
+        <Route path="/admin" element={<AdminPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>

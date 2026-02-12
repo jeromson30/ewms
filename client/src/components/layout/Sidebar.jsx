@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Columns3, CalendarDays, Plus, LogOut, FolderKanban, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Columns3, CalendarDays, Plus, LogOut, FolderKanban, Menu, X, Shield } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useProjects } from '../../context/ProjectContext.jsx';
 import './Sidebar.css';
@@ -9,6 +9,7 @@ export default function Sidebar() {
   const { user, logout } = useAuth();
   const { projects, createProject } = useProjects();
   const navigate = useNavigate();
+  const canManageProjects = user?.role === 'admin' || user?.role === 'manager';
   const [showNew, setShowNew] = useState(false);
   const [newName, setNewName] = useState('');
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -50,17 +51,25 @@ export default function Sidebar() {
             <CalendarDays size={18} />
             Planning global
           </NavLink>
+          {canManageProjects && (
+            <NavLink to="/admin" className="sidebar-link" onClick={() => setMobileOpen(false)}>
+              <Shield size={18} />
+              Administration
+            </NavLink>
+          )}
         </nav>
 
         <div className="sidebar-section">
           <div className="sidebar-section-header">
             <span className="sidebar-section-title">Projets</span>
-            <button className="btn-icon btn-ghost" onClick={() => setShowNew(!showNew)}>
-              <Plus size={16} />
-            </button>
+            {canManageProjects && (
+              <button className="btn-icon btn-ghost" onClick={() => setShowNew(!showNew)}>
+                <Plus size={16} />
+              </button>
+            )}
           </div>
 
-          {showNew && (
+          {showNew && canManageProjects && (
             <form onSubmit={handleCreateProject} className="sidebar-new-project">
               <input
                 className="input"

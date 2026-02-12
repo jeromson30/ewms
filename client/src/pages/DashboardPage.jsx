@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Columns3, CalendarDays, Users, Trash2 } from 'lucide-react';
+import { Plus, Columns3, CalendarDays, Users, Trash2, Clock, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useProjects } from '../context/ProjectContext.jsx';
+import api from '../services/api.js';
 import './DashboardPage.css';
 
 export default function DashboardPage() {
@@ -11,6 +12,29 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ name: '', description: '', color: '#6366f1' });
+  const [planningEvents, setPlanningEvents] = useState([]);
+
+  useEffect(() => {
+    api.get('/planning/global/all')
+      .then(res => setPlanningEvents(res.data.events || []))
+      .catch(() => {});
+  }, []);
+
+  const next7DaysEvents = useMemo(() => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const end = new Date(now);
+    end.setDate(end.getDate() + 7);
+    end.setHours(23, 59, 59, 999);
+
+    return planningEvents
+      .filter(e => {
+        const start = new Date(e.startDate);
+        const eventEnd = new Date(e.endDate);
+        return start <= end && eventEnd >= now;
+      })
+      .sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+  }, [planningEvents]);
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -34,6 +58,8 @@ export default function DashboardPage() {
     return isOwner || member?.role === 'admin' || user?.role === 'admin' || user?.role === 'manager';
   };
 
+  const canManageProjects = user?.role === 'admin' || user?.role === 'manager';
+
   const colors = ['#6366f1', '#0ea5e9', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#8b5cf6', '#14b8a6'];
 
   return (
@@ -43,11 +69,59 @@ export default function DashboardPage() {
           <h1 className="dashboard-title">Bonjour, {user?.firstName}</h1>
           <p className="text-secondary">Gérez vos projets et votre équipe</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-          <Plus size={18} />
-          Nouveau projet
-        </button>
+        {canManageProjects && (
+          <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+            <Plus size={18} />
+            Nouveau projet
+          </button>
+        )}
       </div>
+
+      {next7DaysEvents.length > 0 && (
+        <div className="planning-summary">
+          <div className="planning-summary-header">
+            <Clock size={18} />
+            <h2 className="planning-summary-title">Planning des 7 prochains jours</h2>
+            <span className="badge badge-primary">{next7DaysEvents.length}</span>
+          </div>
+          <div className="planning-summary-list">
+            {next7DaysEvents.slice(0, 8).map((event) => {
+              const start = new Date(event.startDate);
+              const isToday = new Date().toDateString() === start.toDateString();
+              const isTomorrow = new Date(Date.now() + 86400000).toDateString() === start.toDateString();
+              const dayLabel = isToday ? "Aujourd'hui" : isTomorrow ? 'Demain' : start.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+
+              return (
+                <div key={event._id} className={`planning-summary-item ${isToday ? 'is-today' : ''}`}>
+                  <div className="planning-summary-dot" style={{ background: event.color || event.project?.color || '#6366f1' }} />
+                  <div className="planning-summary-content">
+                    <span className="planning-summary-event-title">{event.title}</span>
+                    {event.project?.name && (
+                      <span className="planning-summary-project">{event.project.name}</span>
+                    )}
+                  </div>
+                  <div className="planning-summary-meta">
+                    <span className={`planning-summary-date ${isToday ? 'today' : ''}`}>
+                      {isToday && <AlertTriangle size={12} />}
+                      {dayLabel}
+                    </span>
+                    {!event.allDay && (
+                      <span className="planning-summary-time">
+                        {start.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+            {next7DaysEvents.length > 8 && (
+              <button className="btn btn-ghost btn-sm planning-summary-more" onClick={() => navigate('/planning')}>
+                +{next7DaysEvents.length - 8} autres événements
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="projects-grid">
         {projects.map((project) => (
@@ -89,10 +163,14 @@ export default function DashboardPage() {
           <div className="empty-state">
             <Columns3 size={48} className="text-muted" />
             <h3>Aucun projet</h3>
-            <p className="text-secondary">Créez votre premier projet pour commencer</p>
-            <button className="btn btn-primary mt-4" onClick={() => setShowModal(true)}>
-              <Plus size={18} /> Créer un projet
-            </button>
+            <p className="text-secondary">
+              {canManageProjects ? 'Créez votre premier projet pour commencer' : 'Aucun projet ne vous a été assigné'}
+            </p>
+            {canManageProjects && (
+              <button className="btn btn-primary mt-4" onClick={() => setShowModal(true)}>
+                <Plus size={18} /> Créer un projet
+              </button>
+            )}
           </div>
         )}
       </div>
