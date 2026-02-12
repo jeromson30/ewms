@@ -77,7 +77,7 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {next7DaysEvents.length > 0 && (
+      {next7DaysEvents.length > 0 ? (
         <div className="planning-summary">
           <div className="planning-summary-header">
             <Clock size={18} />
@@ -120,6 +120,14 @@ export default function DashboardPage() {
               </button>
             )}
           </div>
+        </div>
+      ) : (
+        <div className="planning-summary planning-summary-empty">
+          <div className="planning-summary-header">
+            <Clock size={18} />
+            <h2 className="planning-summary-title">Planning des 7 prochains jours</h2>
+          </div>
+          <p className="text-secondary text-sm">Aucun événement prévu sur les 7 prochains jours</p>
         </div>
       )}
 

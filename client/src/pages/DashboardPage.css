@@ -233,6 +233,10 @@
   margin-top: 0.25rem;
 }
 
+.planning-summary-empty .planning-summary-header {
+  margin-bottom: 0.5rem;
+}
+
 @media (max-width: 768px) {
   .planning-summary-content {
     flex-direction: column;
