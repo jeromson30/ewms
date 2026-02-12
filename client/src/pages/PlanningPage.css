@@ -235,6 +235,46 @@
   flex: 1;
 }
 
+/* Clickable events */
+.calendar-event-clickable {
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.calendar-event-clickable:hover {
+  opacity: 0.8;
+}
+
+.upcoming-event-clickable {
+  cursor: pointer;
+  border-radius: var(--border-radius-sm);
+  padding: 0.6rem 0.5rem;
+  transition: var(--transition);
+}
+
+.upcoming-event-clickable:hover {
+  background: rgba(99, 102, 241, 0.06);
+}
+
+/* Event detail modal */
+.event-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.event-detail-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.event-detail-desc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
 @media (max-width: 768px) {
   .calendar-day {
     min-height: 60px;
