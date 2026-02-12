@@ -3,12 +3,7 @@ import Project from '../models/Project.js';
 
 export const getGlobalPlanning = async (req, res) => {
   try {
-    const projects = await Project.find({
-      $or: [
-        { owner: req.user._id },
-        { 'members.user': req.user._id },
-      ],
-    }).select('_id name color');
+    const projects = await Project.find().select('_id name color');
 
     const projectIds = projects.map(p => p._id);
 
