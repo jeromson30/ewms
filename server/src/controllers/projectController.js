@@ -2,12 +2,9 @@ import Project from '../models/Project.js';
 
 export const getProjects = async (req, res) => {
   try {
-    const projects = await Project.find({
-      $or: [
-        { owner: req.user._id },
-        { 'members.user': req.user._id },
-      ],
-    }).populate('owner', 'firstName lastName email avatar').populate('members.user', 'firstName lastName email avatar');
+    const projects = await Project.find()
+      .populate('owner', 'firstName lastName email avatar')
+      .populate('members.user', 'firstName lastName email avatar');
 
     res.json(projects);
   } catch (error) {
