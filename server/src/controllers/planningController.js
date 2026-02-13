@@ -115,13 +115,18 @@ export const getGlobalPlanning = async (req, res) => {
 
 export const getPlanning = async (req, res) => {
   try {
-    let planning = await loadPlanning(req.params.projectId);
+    const projectId = parseInt(req.params.projectId);
+
+    const project = await Project.findByPk(projectId);
+    if (!project) {
+      return res.status(404).json({ message: 'Projet non trouvé.' });
+    }
+
+    let planning = await loadPlanning(projectId);
 
     if (!planning) {
-      planning = await Planning.create({
-        projectId: parseInt(req.params.projectId),
-      });
-      planning = await loadPlanning(req.params.projectId);
+      planning = await Planning.create({ projectId });
+      planning = await loadPlanning(projectId);
     }
 
     res.json(formatPlanning(planning));
