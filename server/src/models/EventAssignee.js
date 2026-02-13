@@ -1,28 +1,22 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/db.js';
 
-const Board = sequelize.define('Board', {
+const EventAssignee = sequelize.define('EventAssignee', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
   },
-  projectId: {
+  eventId: {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
-  name: {
-    type: DataTypes.STRING,
+  userId: {
+    type: DataTypes.INTEGER,
     allowNull: false,
   },
 }, {
-  timestamps: true,
+  timestamps: false,
 });
 
-Board.prototype.toJSON = function () {
-  const values = { ...this.get() };
-  values._id = values.id;
-  return values;
-};
-
-export default Board;
+export default EventAssignee;

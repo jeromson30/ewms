@@ -1,75 +1,25 @@
-import mongoose from 'mongoose';
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/db.js';
 
-const onCallSchema = new mongoose.Schema({
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
+const Planning = sequelize.define('Planning', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
   },
-  startDate: {
-    type: Date,
-    required: true,
+  projectId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    unique: true,
   },
-  endDate: {
-    type: Date,
-    required: true,
-  },
-  type: {
-    type: String,
-    enum: ['primary', 'secondary', 'backup'],
-    default: 'primary',
-  },
-  notes: {
-    type: String,
-    default: '',
-  },
+}, {
+  timestamps: true,
 });
 
-const eventSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
-  },
-  description: {
-    type: String,
-    default: '',
-  },
-  startDate: {
-    type: Date,
-    required: true,
-  },
-  endDate: {
-    type: Date,
-    required: true,
-  },
-  allDay: {
-    type: Boolean,
-    default: false,
-  },
-  type: {
-    type: String,
-    enum: ['meeting', 'deadline', 'milestone', 'oncall', 'other'],
-    default: 'other',
-  },
-  assignees: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-  },
-  color: {
-    type: String,
-    default: '#6366f1',
-  },
-});
+Planning.prototype.toJSON = function () {
+  const values = { ...this.get() };
+  values._id = values.id;
+  return values;
+};
 
-const planningSchema = new mongoose.Schema({
-  project: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Project',
-    required: true,
-  },
-  events: [eventSchema],
-  onCallSchedule: [onCallSchema],
-}, { timestamps: true });
-
-export default mongoose.model('Planning', planningSchema);
+export default Planning;

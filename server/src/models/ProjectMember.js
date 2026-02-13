@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/db.js';
 
-const Board = sequelize.define('Board', {
+const ProjectMember = sequelize.define('ProjectMember', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -11,18 +11,16 @@ const Board = sequelize.define('Board', {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
-  name: {
-    type: DataTypes.STRING,
+  userId: {
+    type: DataTypes.INTEGER,
     allowNull: false,
   },
+  role: {
+    type: DataTypes.ENUM('admin', 'member'),
+    defaultValue: 'member',
+  },
 }, {
-  timestamps: true,
+  timestamps: false,
 });
 
-Board.prototype.toJSON = function () {
-  const values = { ...this.get() };
-  values._id = values.id;
-  return values;
-};
-
-export default Board;
+export default ProjectMember;
