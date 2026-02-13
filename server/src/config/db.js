@@ -1,13 +1,27 @@
-import mongoose from 'mongoose';
+import { Sequelize } from 'sequelize';
 
-const connectDB = async () => {
+const sequelize = new Sequelize(
+  process.env.DB_NAME || 'teamflow',
+  process.env.DB_USER || 'postgres',
+  process.env.DB_PASSWORD || 'postgres',
+  {
+    host: process.env.DB_HOST || 'localhost',
+    port: process.env.DB_PORT || 5432,
+    dialect: 'postgres',
+    logging: false,
+  }
+);
+
+export const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI);
-    console.log(`MongoDB connecté: ${conn.connection.host}`);
+    await sequelize.authenticate();
+    console.log('PostgreSQL connecté');
+    await sequelize.sync({ alter: true });
+    console.log('Tables synchronisées');
   } catch (error) {
-    console.error(`Erreur de connexion MongoDB: ${error.message}`);
+    console.error(`Erreur de connexion PostgreSQL: ${error.message}`);
     process.exit(1);
   }
 };
 
-export default connectDB;
+export default sequelize;

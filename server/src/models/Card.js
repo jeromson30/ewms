@@ -1,37 +1,44 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/db.js';
 
-const Project = sequelize.define('Project', {
+const Card = sequelize.define('Card', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
   },
-  name: {
+  columnId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  title: {
     type: DataTypes.STRING,
     allowNull: false,
-    validate: { notEmpty: { msg: 'Le nom du projet est requis' } },
   },
   description: {
     type: DataTypes.TEXT,
     defaultValue: '',
   },
-  ownerId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
+  dueDate: {
+    type: DataTypes.DATE,
+    allowNull: true,
   },
-  color: {
-    type: DataTypes.STRING,
-    defaultValue: '#6366f1',
+  priority: {
+    type: DataTypes.ENUM('low', 'medium', 'high', 'urgent'),
+    defaultValue: 'medium',
+  },
+  position: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
   },
 }, {
   timestamps: true,
 });
 
-Project.prototype.toJSON = function () {
+Card.prototype.toJSON = function () {
   const values = { ...this.get() };
   values._id = values.id;
   return values;
 };
 
-export default Project;
+export default Card;

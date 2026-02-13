@@ -1,28 +1,26 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/db.js';
 
-const Board = sequelize.define('Board', {
+const CardLabel = sequelize.define('CardLabel', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
   },
-  projectId: {
+  cardId: {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
-  name: {
+  text: {
     type: DataTypes.STRING,
-    allowNull: false,
+    defaultValue: '',
+  },
+  color: {
+    type: DataTypes.STRING,
+    defaultValue: '#6366f1',
   },
 }, {
-  timestamps: true,
+  timestamps: false,
 });
 
-Board.prototype.toJSON = function () {
-  const values = { ...this.get() };
-  values._id = values.id;
-  return values;
-};
-
-export default Board;
+export default CardLabel;

@@ -1,57 +1,78 @@
-import mongoose from 'mongoose';
+import { DataTypes } from 'sequelize';
 import bcrypt from 'bcryptjs';
+import sequelize from '../config/db.js';
 
-const userSchema = new mongoose.Schema({
+const User = sequelize.define('User', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
   firstName: {
-    type: String,
-    required: [true, 'Le prénom est requis'],
-    trim: true,
-    maxlength: 50,
+    type: DataTypes.STRING(50),
+    allowNull: false,
+    validate: { notEmpty: { msg: 'Le prénom est requis' } },
   },
   lastName: {
-    type: String,
-    required: [true, 'Le nom est requis'],
-    trim: true,
-    maxlength: 50,
+    type: DataTypes.STRING(50),
+    allowNull: false,
+    validate: { notEmpty: { msg: 'Le nom est requis' } },
   },
   email: {
-    type: String,
-    required: [true, "L'email est requis"],
+    type: DataTypes.STRING,
+    allowNull: false,
     unique: true,
-    lowercase: true,
-    trim: true,
+    validate: { isEmail: true },
+    set(value) {
+      this.setDataValue('email', value.toLowerCase().trim());
+    },
   },
   password: {
-    type: String,
-    required: [true, 'Le mot de passe est requis'],
-    minlength: 6,
-    select: false,
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: { len: [6, 255] },
   },
   avatar: {
-    type: String,
-    default: '',
+    type: DataTypes.STRING,
+    defaultValue: '',
   },
   role: {
-    type: String,
-    enum: ['admin', 'manager', 'member'],
-    default: 'member',
+    type: DataTypes.ENUM('admin', 'manager', 'member'),
+    defaultValue: 'member',
   },
-}, { timestamps: true });
-
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 12);
-  next();
+}, {
+  timestamps: true,
+  defaultScope: {
+    attributes: { exclude: ['password'] },
+  },
+  scopes: {
+    withPassword: {
+      attributes: {},
+    },
+  },
 });
 
-userSchema.methods.comparePassword = async function (candidatePassword) {
+User.beforeCreate(async (user) => {
+  if (user.password) {
+    user.password = await bcrypt.hash(user.password, 12);
+  }
+});
+
+User.beforeUpdate(async (user) => {
+  if (user.changed('password')) {
+    user.password = await bcrypt.hash(user.password, 12);
+  }
+});
+
+User.prototype.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-userSchema.methods.toJSON = function () {
-  const obj = this.toObject();
-  delete obj.password;
-  return obj;
+User.prototype.toJSON = function () {
+  const values = { ...this.get() };
+  delete values.password;
+  values._id = values.id;
+  return values;
 };
 
-export default mongoose.model('User', userSchema);
+export default User;

@@ -1,12 +1,36 @@
-import Project from '../models/Project.js';
+import { Project, ProjectMember, User } from '../models/index.js';
+
+const userAttributes = ['id', 'firstName', 'lastName', 'email', 'avatar'];
+
+const formatProject = (project) => {
+  const json = project.toJSON();
+  if (json.members) {
+    json.members = json.members.map(m => ({
+      _id: m.id,
+      user: m.user ? { ...m.user, _id: m.user.id } : m.userId,
+      role: m.role,
+    }));
+  }
+  if (json.owner) {
+    json.owner = { ...json.owner, _id: json.owner.id };
+  }
+  return json;
+};
 
 export const getProjects = async (req, res) => {
   try {
-    const projects = await Project.find()
-      .populate('owner', 'firstName lastName email avatar')
-      .populate('members.user', 'firstName lastName email avatar');
+    const projects = await Project.findAll({
+      include: [
+        { model: User, as: 'owner', attributes: userAttributes },
+        {
+          model: ProjectMember,
+          as: 'members',
+          include: [{ model: User, as: 'user', attributes: userAttributes }],
+        },
+      ],
+    });
 
-    res.json(projects);
+    res.json(projects.map(formatProject));
   } catch (error) {
     res.status(500).json({ message: 'Erreur serveur.', error: error.message });
   }
@@ -24,14 +48,27 @@ export const createProject = async (req, res) => {
       name,
       description,
       color,
-      owner: req.user._id,
-      members: [{ user: req.user._id, role: 'admin' }],
+      ownerId: req.user.id,
     });
 
-    await project.populate('owner', 'firstName lastName email avatar');
-    await project.populate('members.user', 'firstName lastName email avatar');
+    await ProjectMember.create({
+      projectId: project.id,
+      userId: req.user.id,
+      role: 'admin',
+    });
 
-    res.status(201).json(project);
+    const fullProject = await Project.findByPk(project.id, {
+      include: [
+        { model: User, as: 'owner', attributes: userAttributes },
+        {
+          model: ProjectMember,
+          as: 'members',
+          include: [{ model: User, as: 'user', attributes: userAttributes }],
+        },
+      ],
+    });
+
+    res.status(201).json(formatProject(fullProject));
   } catch (error) {
     res.status(500).json({ message: 'Erreur serveur.', error: error.message });
   }
@@ -39,17 +76,28 @@ export const createProject = async (req, res) => {
 
 export const updateProject = async (req, res) => {
   try {
-    const project = await Project.findOneAndUpdate(
-      { _id: req.params.id, owner: req.user._id },
-      req.body,
-      { new: true, runValidators: true },
-    ).populate('owner', 'firstName lastName email avatar').populate('members.user', 'firstName lastName email avatar');
+    const project = await Project.findOne({
+      where: { id: req.params.id, ownerId: req.user.id },
+    });
 
     if (!project) {
       return res.status(404).json({ message: 'Projet non trouvé.' });
     }
 
-    res.json(project);
+    await project.update(req.body);
+
+    const fullProject = await Project.findByPk(project.id, {
+      include: [
+        { model: User, as: 'owner', attributes: userAttributes },
+        {
+          model: ProjectMember,
+          as: 'members',
+          include: [{ model: User, as: 'user', attributes: userAttributes }],
+        },
+      ],
+    });
+
+    res.json(formatProject(fullProject));
   } catch (error) {
     res.status(500).json({ message: 'Erreur serveur.', error: error.message });
   }
@@ -57,21 +105,23 @@ export const updateProject = async (req, res) => {
 
 export const deleteProject = async (req, res) => {
   try {
-    const project = await Project.findById(req.params.id);
+    const project = await Project.findByPk(req.params.id, {
+      include: [{ model: ProjectMember, as: 'members' }],
+    });
 
     if (!project) {
       return res.status(404).json({ message: 'Projet non trouvé.' });
     }
 
-    const isOwner = project.owner.toString() === req.user._id.toString();
-    const member = project.members.find(m => m.user.toString() === req.user._id.toString());
-    const isAdminOrManager = member && (member.role === 'admin') || req.user.role === 'admin' || req.user.role === 'manager';
+    const isOwner = project.ownerId === req.user.id;
+    const member = project.members.find(m => m.userId === req.user.id);
+    const isAdminOrManager = (member && member.role === 'admin') || req.user.role === 'admin' || req.user.role === 'manager';
 
     if (!isOwner && !isAdminOrManager) {
       return res.status(403).json({ message: "Seuls les administrateurs et managers peuvent supprimer un projet." });
     }
 
-    await Project.findByIdAndDelete(req.params.id);
+    await project.destroy();
     res.json({ message: 'Projet supprimé.' });
   } catch (error) {
     res.status(500).json({ message: 'Erreur serveur.', error: error.message });
@@ -81,22 +131,37 @@ export const deleteProject = async (req, res) => {
 export const addMember = async (req, res) => {
   try {
     const { userId, role } = req.body;
-    const project = await Project.findById(req.params.id);
+    const project = await Project.findByPk(req.params.id);
 
     if (!project) {
       return res.status(404).json({ message: 'Projet non trouvé.' });
     }
 
-    const alreadyMember = project.members.some(m => m.user.toString() === userId);
-    if (alreadyMember) {
+    const existing = await ProjectMember.findOne({
+      where: { projectId: project.id, userId },
+    });
+    if (existing) {
       return res.status(400).json({ message: 'Utilisateur déjà membre du projet.' });
     }
 
-    project.members.push({ user: userId, role: role || 'member' });
-    await project.save();
-    await project.populate('members.user', 'firstName lastName email avatar');
+    await ProjectMember.create({
+      projectId: project.id,
+      userId,
+      role: role || 'member',
+    });
 
-    res.json(project);
+    const fullProject = await Project.findByPk(project.id, {
+      include: [
+        { model: User, as: 'owner', attributes: userAttributes },
+        {
+          model: ProjectMember,
+          as: 'members',
+          include: [{ model: User, as: 'user', attributes: userAttributes }],
+        },
+      ],
+    });
+
+    res.json(formatProject(fullProject));
   } catch (error) {
     res.status(500).json({ message: 'Erreur serveur.', error: error.message });
   }
