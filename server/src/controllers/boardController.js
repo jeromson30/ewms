@@ -1,5 +1,5 @@
 import { Op } from 'sequelize';
-import { Board, Column, Card, CardAssignee, CardLabel, User } from '../models/index.js';
+import { Board, Column, Card, CardAssignee, CardLabel, User, Project } from '../models/index.js';
 import sequelize from '../config/db.js';
 
 const userAttributes = ['id', 'firstName', 'lastName', 'email', 'avatar'];
@@ -47,11 +47,18 @@ const formatBoard = (board) => {
 
 export const getBoard = async (req, res) => {
   try {
-    let board = await loadFullBoard(req.params.projectId);
+    const projectId = parseInt(req.params.projectId);
+
+    const project = await Project.findByPk(projectId);
+    if (!project) {
+      return res.status(404).json({ message: 'Projet non trouvé.' });
+    }
+
+    let board = await loadFullBoard(projectId);
 
     if (!board) {
       board = await Board.create({
-        projectId: parseInt(req.params.projectId),
+        projectId,
         name: 'Board principal',
       });
 
@@ -66,7 +73,7 @@ export const getBoard = async (req, res) => {
         await Column.create({ ...col, boardId: board.id });
       }
 
-      board = await loadFullBoard(req.params.projectId);
+      board = await loadFullBoard(projectId);
     }
 
     res.json(formatBoard(board));
