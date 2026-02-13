@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { Plus, ChevronLeft, ChevronRight, Phone, Calendar, Clock, Trash2, X, Pencil } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, Phone, Calendar, Clock, Trash2, X, Pencil, Check, AlertCircle } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, addMonths, subMonths, isSameMonth, isSameDay, isWithinInterval, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -33,6 +33,12 @@ export default function PlanningPage() {
   const [editMode, setEditMode] = useState(false);
   const [users, setUsers] = useState([]);
   const [activeTab, setActiveTab] = useState('calendar');
+  const [toast, setToast] = useState(null);
+
+  const showToast = useCallback((message, type = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  }, []);
 
   const [eventForm, setEventForm] = useState({
     title: '', description: '', startDate: '', endDate: '',
@@ -64,47 +70,63 @@ export default function PlanningPage() {
     e.preventDefault();
     try {
       await api.post(`/planning/${projectId}/events`, eventForm);
-      loadPlanning();
+      await loadPlanning();
       setShowEventModal(false);
       setEventForm({ title: '', description: '', startDate: '', endDate: '', allDay: false, type: 'other', color: '#6366f1' });
-    } catch { /* handled */ }
+      showToast('Événement créé avec succès');
+    } catch {
+      showToast('Erreur lors de la création de l\'événement', 'error');
+    }
   };
 
   const handleUpdateEvent = async (e) => {
     e.preventDefault();
     try {
       await api.put(`/planning/${projectId}/events/${selectedEvent._id}`, eventForm);
-      loadPlanning();
+      await loadPlanning();
       setSelectedEvent(null);
       setEditMode(false);
-    } catch { /* handled */ }
+      showToast('Événement modifié avec succès');
+    } catch {
+      showToast('Erreur lors de la modification de l\'événement', 'error');
+    }
   };
 
   const handleDeleteEvent = async (eventId) => {
     if (!window.confirm('Supprimer cet événement ?')) return;
     try {
       await api.delete(`/planning/${projectId}/events/${eventId}`);
-      loadPlanning();
+      await loadPlanning();
       setSelectedEvent(null);
       setEditMode(false);
-    } catch { /* handled */ }
+      showToast('Événement supprimé');
+    } catch {
+      showToast('Erreur lors de la suppression de l\'événement', 'error');
+    }
   };
 
   const handleAddOnCall = async (e) => {
     e.preventDefault();
     try {
       await api.post(`/planning/${projectId}/oncall`, onCallForm);
-      loadPlanning();
+      await loadPlanning();
       setShowOnCallModal(false);
       setOnCallForm({ user: '', startDate: '', endDate: '', type: 'primary', notes: '' });
-    } catch { /* handled */ }
+      showToast('Astreinte créée avec succès');
+    } catch {
+      showToast('Erreur lors de la création de l\'astreinte', 'error');
+    }
   };
 
   const handleDeleteOnCall = async (onCallId) => {
+    if (!window.confirm('Supprimer cette astreinte ?')) return;
     try {
       await api.delete(`/planning/${projectId}/oncall/${onCallId}`);
-      loadPlanning();
-    } catch { /* handled */ }
+      await loadPlanning();
+      showToast('Astreinte supprimée');
+    } catch {
+      showToast('Erreur lors de la suppression de l\'astreinte', 'error');
+    }
   };
 
   const openEventDetail = (ev, e) => {
@@ -469,6 +491,14 @@ export default function PlanningPage() {
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {/* Toast notification */}
+      {toast && (
+        <div className={`toast toast-${toast.type}`}>
+          {toast.type === 'success' ? <Check size={16} /> : <AlertCircle size={16} />}
+          {toast.message}
         </div>
       )}
 
