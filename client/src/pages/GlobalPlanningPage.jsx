@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Phone, Calendar, Clock, Globe, X, Trash2, Pencil } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Phone, Calendar, Clock, Globe, X, Trash2, Pencil, Check, AlertCircle } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, addMonths, subMonths, isSameMonth, isSameDay, isWithinInterval, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -35,6 +35,12 @@ export default function GlobalPlanningPage() {
     title: '', description: '', startDate: '', endDate: '',
     allDay: false, type: 'other', color: '#6366f1',
   });
+  const [toast, setToast] = useState(null);
+
+  const showToast = useCallback((message, type = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  }, []);
 
   const loadData = () => {
     api.get('/planning/global/all')
@@ -82,7 +88,10 @@ export default function GlobalPlanningPage() {
       loadData();
       setSelectedEvent(null);
       setEditMode(false);
-    } catch { /* handled */ }
+      showToast('Événement modifié avec succès');
+    } catch {
+      showToast('Erreur lors de la modification de l\'événement', 'error');
+    }
   };
 
   const handleDeleteEvent = async (eventId) => {
@@ -94,7 +103,10 @@ export default function GlobalPlanningPage() {
       loadData();
       setSelectedEvent(null);
       setEditMode(false);
-    } catch { /* handled */ }
+      showToast('Événement supprimé');
+    } catch {
+      showToast('Erreur lors de la suppression de l\'événement', 'error');
+    }
   };
 
   const filteredEvents = data?.events?.filter(
@@ -305,6 +317,14 @@ export default function GlobalPlanningPage() {
           {filteredEvents.filter(ev => new Date(ev.startDate) >= new Date()).length === 0 && (
             <p className="text-sm text-muted" style={{ padding: '1rem 0' }}>Aucun événement à venir</p>
           )}
+        </div>
+      )}
+
+      {/* Toast notification */}
+      {toast && (
+        <div className={`toast toast-${toast.type}`}>
+          {toast.type === 'success' ? <Check size={16} /> : <AlertCircle size={16} />}
+          {toast.message}
         </div>
       )}
 
