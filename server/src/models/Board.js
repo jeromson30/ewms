@@ -19,10 +19,4 @@ const Board = sequelize.define('Board', {
   timestamps: true,
 });
 
-Board.prototype.toJSON = function () {
-  const values = { ...this.get() };
-  values._id = values.id;
-  return values;
-};
-
 export default Board;

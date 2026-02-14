@@ -47,10 +47,4 @@ const Event = sequelize.define('Event', {
   timestamps: true,
 });
 
-Event.prototype.toJSON = function () {
-  const values = { ...this.get() };
-  values._id = values.id;
-  return values;
-};
-
 export default Event;

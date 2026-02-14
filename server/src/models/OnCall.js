@@ -35,10 +35,4 @@ const OnCall = sequelize.define('OnCall', {
   timestamps: false,
 });
 
-OnCall.prototype.toJSON = function () {
-  const values = { ...this.get() };
-  values._id = values.id;
-  return values;
-};
-
 export default OnCall;

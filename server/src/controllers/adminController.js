@@ -1,4 +1,5 @@
 import { User, Board, Column, Card, CardAssignee } from '../models/index.js';
+import { addIdAlias } from '../utils/serialize.js';
 
 export const getUsersWithStats = async (req, res) => {
   try {
@@ -50,7 +51,7 @@ export const getUsersWithStats = async (req, res) => {
     }
 
     const result = users.map(u => ({
-      ...u.toJSON(),
+      ...addIdAlias(u.get({ plain: true })),
       stats: statsMap[u.id] || { assigned: 0, completed: 0 },
     }));
 
@@ -96,7 +97,7 @@ export const updateUser = async (req, res) => {
       attributes: ['id', 'firstName', 'lastName', 'email', 'role', 'avatar', 'createdAt'],
     });
 
-    res.json(updated);
+    res.json(addIdAlias(updated.get({ plain: true })));
   } catch (error) {
     res.status(500).json({ message: 'Erreur serveur.', error: error.message });
   }

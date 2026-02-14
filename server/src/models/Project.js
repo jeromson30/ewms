@@ -28,10 +28,4 @@ const Project = sequelize.define('Project', {
   timestamps: true,
 });
 
-Project.prototype.toJSON = function () {
-  const values = { ...this.get() };
-  values._id = values.id;
-  return values;
-};
-
 export default Project;

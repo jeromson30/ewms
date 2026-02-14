@@ -35,10 +35,4 @@ const Card = sequelize.define('Card', {
   timestamps: true,
 });
 
-Card.prototype.toJSON = function () {
-  const values = { ...this.get() };
-  values._id = values.id;
-  return values;
-};
-
 export default Card;

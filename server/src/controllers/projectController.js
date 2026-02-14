@@ -1,18 +1,16 @@
 import { Project, ProjectMember, User } from '../models/index.js';
+import { toPlainWithIds } from '../utils/serialize.js';
 
 const userAttributes = ['id', 'firstName', 'lastName', 'email', 'avatar'];
 
 const formatProject = (project) => {
-  const json = project.toJSON();
+  const json = toPlainWithIds(project);
   if (json.members) {
     json.members = json.members.map(m => ({
-      _id: m.id,
-      user: m.user ? { ...m.user, _id: m.user.id } : m.userId,
+      _id: m.id || m._id,
+      user: m.user || m.userId,
       role: m.role,
     }));
-  }
-  if (json.owner) {
-    json.owner = { ...json.owner, _id: json.owner.id };
   }
   return json;
 };

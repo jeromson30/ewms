@@ -16,10 +16,4 @@ const Planning = sequelize.define('Planning', {
   timestamps: true,
 });
 
-Planning.prototype.toJSON = function () {
-  const values = { ...this.get() };
-  values._id = values.id;
-  return values;
-};
-
 export default Planning;
