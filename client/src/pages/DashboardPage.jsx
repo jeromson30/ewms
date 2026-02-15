@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Columns3, CalendarDays, Users, Trash2, Clock, AlertTriangle, UserPlus, X } from 'lucide-react';
+import { Plus, Columns3, CalendarDays, Users, Trash2, Clock, UserPlus, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useProjects } from '../context/ProjectContext.jsx';
 import api from '../services/api.js';
@@ -26,21 +26,33 @@ export default function DashboardPage() {
       .catch(() => {});
   }, []);
 
-  const next7DaysEvents = useMemo(() => {
+  const next7Days = useMemo(() => {
+    const days = [];
     const now = new Date();
     now.setHours(0, 0, 0, 0);
-    const end = new Date(now);
-    end.setDate(end.getDate() + 7);
-    end.setHours(23, 59, 59, 999);
 
-    return planningEvents
-      .filter(e => {
-        const start = new Date(e.startDate);
-        const eventEnd = new Date(e.endDate);
-        return start <= end && eventEnd >= now;
-      })
-      .sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+    for (let i = 0; i < 7; i++) {
+      const dayStart = new Date(now);
+      dayStart.setDate(dayStart.getDate() + i);
+      const dayEnd = new Date(dayStart);
+      dayEnd.setHours(23, 59, 59, 999);
+
+      const dayEvents = planningEvents
+        .filter(e => {
+          const start = new Date(e.startDate);
+          const eventEnd = new Date(e.endDate);
+          return start <= dayEnd && eventEnd >= dayStart;
+        })
+        .sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+
+      days.push({ date: dayStart, events: dayEvents });
+    }
+    return days;
   }, [planningEvents]);
+
+  const totalEvents = useMemo(() =>
+    next7Days.reduce((sum, d) => sum + d.events.length, 0)
+  , [next7Days]);
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -104,59 +116,58 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {next7DaysEvents.length > 0 ? (
-        <div className="planning-summary">
-          <div className="planning-summary-header">
-            <Clock size={18} />
-            <h2 className="planning-summary-title">Planning des 7 prochains jours</h2>
-            <span className="badge badge-primary">{next7DaysEvents.length}</span>
-          </div>
-          <div className="planning-summary-list">
-            {next7DaysEvents.slice(0, 8).map((event) => {
-              const start = new Date(event.startDate);
-              const isToday = new Date().toDateString() === start.toDateString();
-              const isTomorrow = new Date(Date.now() + 86400000).toDateString() === start.toDateString();
-              const dayLabel = isToday ? "Aujourd'hui" : isTomorrow ? 'Demain' : start.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+      <div className="planning-summary">
+        <div className="planning-summary-header">
+          <Clock size={18} />
+          <h2 className="planning-summary-title">Planning des 7 prochains jours</h2>
+          {totalEvents > 0 && <span className="badge badge-primary">{totalEvents}</span>}
+        </div>
+        <div className="planning-week-grid">
+          {next7Days.map((day, i) => {
+            const isToday = i === 0;
+            const isTomorrow = i === 1;
+            const dayLabel = isToday
+              ? "Aujourd'hui"
+              : isTomorrow
+                ? 'Demain'
+                : day.date.toLocaleDateString('fr-FR', { weekday: 'short' });
+            const dateLabel = day.date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
 
-              return (
-                <div key={event._id} className={`planning-summary-item ${isToday ? 'is-today' : ''}`}>
-                  <div className="planning-summary-dot" style={{ background: event.color || event.project?.color || '#6366f1' }} />
-                  <div className="planning-summary-content">
-                    <span className="planning-summary-event-title">{event.title}</span>
-                    {event.project?.name && (
-                      <span className="planning-summary-project">{event.project.name}</span>
-                    )}
-                  </div>
-                  <div className="planning-summary-meta">
-                    <span className={`planning-summary-date ${isToday ? 'today' : ''}`}>
-                      {isToday && <AlertTriangle size={12} />}
-                      {dayLabel}
-                    </span>
-                    {!event.allDay && (
-                      <span className="planning-summary-time">
-                        {start.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                    )}
-                  </div>
+            return (
+              <div key={i} className={`planning-week-col ${isToday ? 'is-today' : ''}`}>
+                <div className="planning-week-col-header">
+                  <span className="planning-week-col-day">{dayLabel}</span>
+                  <span className="planning-week-col-date">{dateLabel}</span>
                 </div>
-              );
-            })}
-            {next7DaysEvents.length > 8 && (
-              <button className="btn btn-ghost btn-sm planning-summary-more" onClick={() => navigate('/planning')}>
-                +{next7DaysEvents.length - 8} autres événements
-              </button>
-            )}
-          </div>
+                <div className="planning-week-col-events">
+                  {day.events.length === 0 && (
+                    <span className="planning-week-col-empty">—</span>
+                  )}
+                  {day.events.map(event => {
+                    const start = new Date(event.startDate);
+                    return (
+                      <div key={event._id} className="planning-week-event">
+                        <div className="planning-week-event-dot" style={{ background: event.color || event.project?.color || '#6366f1' }} />
+                        <div className="planning-week-event-info">
+                          <span className="planning-week-event-title">{event.title}</span>
+                          {!event.allDay && (
+                            <span className="planning-week-event-time">
+                              {start.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          )}
+                          {event.project?.name && (
+                            <span className="planning-week-event-project">{event.project.name}</span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
         </div>
-      ) : (
-        <div className="planning-summary planning-summary-empty">
-          <div className="planning-summary-header">
-            <Clock size={18} />
-            <h2 className="planning-summary-title">Planning des 7 prochains jours</h2>
-          </div>
-          <p className="text-secondary text-sm">Aucun événement prévu sur les 7 prochains jours</p>
-        </div>
-      )}
+      </div>
 
       <div className="projects-grid">
         {projects.map((project) => (
