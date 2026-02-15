@@ -1,6 +1,7 @@
 import { Op } from 'sequelize';
 import { Board, Column, Card, CardAssignee, CardLabel, User, Project } from '../models/index.js';
 import sequelize from '../config/db.js';
+import { toPlainWithIds } from '../utils/serialize.js';
 
 const userAttributes = ['id', 'firstName', 'lastName', 'email', 'avatar'];
 
@@ -31,18 +32,7 @@ const loadFullBoard = async (projectId) => {
 };
 
 const formatBoard = (board) => {
-  const json = board.toJSON();
-  if (json.columns) {
-    json.columns = json.columns.map(col => ({
-      ...col,
-      cards: (col.cards || []).map(card => ({
-        ...card,
-        assignees: (card.assignees || []).map(a => ({ ...a, _id: a.id })),
-        labels: (card.labels || []).map(l => ({ ...l, _id: l.id })),
-      })),
-    }));
-  }
-  return json;
+  return toPlainWithIds(board);
 };
 
 export const getBoard = async (req, res) => {

@@ -27,10 +27,4 @@ const Column = sequelize.define('Column', {
   timestamps: false,
 });
 
-Column.prototype.toJSON = function () {
-  const values = { ...this.get() };
-  values._id = values.id;
-  return values;
-};
-
 export default Column;

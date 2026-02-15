@@ -1,4 +1,5 @@
 import { Planning, Event, EventAssignee, OnCall, Project, User } from '../models/index.js';
+import { toPlainWithIds, addIdAlias } from '../utils/serialize.js';
 
 const userAttributes = ['id', 'firstName', 'lastName', 'email', 'avatar'];
 const createdByAttributes = ['id', 'firstName', 'lastName', 'email'];
@@ -31,21 +32,7 @@ const loadPlanning = async (projectId) => {
 };
 
 const formatPlanning = (planning) => {
-  const json = planning.toJSON();
-  if (json.events) {
-    json.events = json.events.map(e => ({
-      ...e,
-      assignees: (e.assignees || []).map(a => ({ ...a, _id: a.id })),
-      createdBy: e.createdBy ? { ...e.createdBy, _id: e.createdBy.id } : null,
-    }));
-  }
-  if (json.onCallSchedule) {
-    json.onCallSchedule = json.onCallSchedule.map(o => ({
-      ...o,
-      user: o.user ? { ...o.user, _id: o.user.id } : null,
-    }));
-  }
-  return json;
+  return toPlainWithIds(planning);
 };
 
 export const getGlobalPlanning = async (req, res) => {
@@ -82,30 +69,22 @@ export const getGlobalPlanning = async (req, res) => {
     const allOnCalls = [];
 
     for (const planning of plannings) {
-      const projectInfo = {
-        _id: planning.Project.id,
-        name: planning.Project.name,
-        color: planning.Project.color,
-      };
+      const plain = toPlainWithIds(planning);
+      const projectInfo = plain.Project;
 
-      for (const event of planning.events || []) {
-        const eventJson = event.toJSON();
-        eventJson.assignees = (eventJson.assignees || []).map(a => ({ ...a, _id: a.id }));
-        eventJson.createdBy = eventJson.createdBy ? { ...eventJson.createdBy, _id: eventJson.createdBy.id } : null;
-        allEvents.push({ ...eventJson, project: projectInfo });
+      for (const event of plain.events || []) {
+        allEvents.push({ ...event, project: projectInfo });
       }
 
-      for (const onCall of planning.onCallSchedule || []) {
-        const onCallJson = onCall.toJSON();
-        onCallJson.user = onCallJson.user ? { ...onCallJson.user, _id: onCallJson.user.id } : null;
-        allOnCalls.push({ ...onCallJson, project: projectInfo });
+      for (const onCall of plain.onCallSchedule || []) {
+        allOnCalls.push({ ...onCall, project: projectInfo });
       }
     }
 
     allEvents.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
     allOnCalls.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
 
-    const formattedProjects = projects.map(p => ({ ...p.toJSON() }));
+    const formattedProjects = projects.map(p => addIdAlias(p.get({ plain: true })));
 
     res.json({ events: allEvents, onCallSchedule: allOnCalls, projects: formattedProjects });
   } catch (error) {

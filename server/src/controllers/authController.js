@@ -1,15 +1,12 @@
 import { User } from '../models/index.js';
 import { generateToken } from '../utils/token.js';
+import { addIdAlias } from '../utils/serialize.js';
 
-const formatUser = (user) => ({
-  id: user.id,
-  _id: user.id,
-  firstName: user.firstName,
-  lastName: user.lastName,
-  email: user.email,
-  role: user.role,
-  avatar: user.avatar,
-});
+const formatUser = (user) => {
+  const plain = user.get ? user.get({ plain: true }) : user;
+  delete plain.password;
+  return addIdAlias(plain);
+};
 
 export const register = async (req, res) => {
   try {
@@ -55,7 +52,7 @@ export const getUsers = async (_req, res) => {
     const users = await User.findAll({
       attributes: ['id', 'firstName', 'lastName', 'email', 'role', 'avatar'],
     });
-    res.json(users);
+    res.json(users.map(u => addIdAlias(u.get({ plain: true }))));
   } catch (error) {
     res.status(500).json({ message: 'Erreur serveur.', error: error.message });
   }
