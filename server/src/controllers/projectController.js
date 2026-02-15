@@ -164,3 +164,42 @@ export const addMember = async (req, res) => {
     res.status(500).json({ message: 'Erreur serveur.', error: error.message });
   }
 };
+
+export const removeMember = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const project = await Project.findByPk(req.params.id);
+
+    if (!project) {
+      return res.status(404).json({ message: 'Projet non trouvé.' });
+    }
+
+    if (parseInt(userId) === project.ownerId) {
+      return res.status(400).json({ message: 'Impossible de retirer le propriétaire du projet.' });
+    }
+
+    const member = await ProjectMember.findOne({
+      where: { projectId: project.id, userId },
+    });
+    if (!member) {
+      return res.status(404).json({ message: 'Membre non trouvé.' });
+    }
+
+    await member.destroy();
+
+    const fullProject = await Project.findByPk(project.id, {
+      include: [
+        { model: User, as: 'owner', attributes: userAttributes },
+        {
+          model: ProjectMember,
+          as: 'members',
+          include: [{ model: User, as: 'user', attributes: userAttributes }],
+        },
+      ],
+    });
+
+    res.json(formatProject(fullProject));
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};

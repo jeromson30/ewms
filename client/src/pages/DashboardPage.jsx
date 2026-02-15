@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Columns3, CalendarDays, Users, Trash2, Clock, AlertTriangle } from 'lucide-react';
+import { Plus, Columns3, CalendarDays, Users, Trash2, Clock, AlertTriangle, UserPlus, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useProjects } from '../context/ProjectContext.jsx';
 import api from '../services/api.js';
@@ -13,10 +13,16 @@ export default function DashboardPage() {
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ name: '', description: '', color: '#6366f1' });
   const [planningEvents, setPlanningEvents] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
+  const [membersProject, setMembersProject] = useState(null);
+  const [addMemberUserId, setAddMemberUserId] = useState('');
 
   useEffect(() => {
     api.get('/planning/global/all')
       .then(res => setPlanningEvents(res.data.events || []))
+      .catch(() => {});
+    api.get('/auth/users')
+      .then(res => setAllUsers(res.data))
       .catch(() => {});
   }, []);
 
@@ -50,6 +56,27 @@ export default function DashboardPage() {
     try {
       await deleteProject(id);
     } catch { /* handled */ }
+  };
+
+  const handleAddMember = async (projectId, userId) => {
+    try {
+      const res = await api.post(`/projects/${projectId}/members`, { userId });
+      setMembersProject(res.data);
+      await loadProjects();
+    } catch { /* handled */ }
+  };
+
+  const handleRemoveMember = async (projectId, userId) => {
+    try {
+      const res = await api.delete(`/projects/${projectId}/members/${userId}`);
+      setMembersProject(res.data);
+      await loadProjects();
+    } catch { /* handled */ }
+  };
+
+  const openMembersModal = (project) => {
+    setMembersProject(project);
+    setAddMemberUserId('');
   };
 
   const canDelete = (project) => {
@@ -163,6 +190,12 @@ export default function DashboardPage() {
               >
                 <CalendarDays size={14} /> Planning
               </button>
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={() => openMembersModal(project)}
+              >
+                <Users size={14} /> Membres
+              </button>
             </div>
           </div>
         ))}
@@ -234,6 +267,87 @@ export default function DashboardPage() {
                 <button type="submit" className="btn btn-primary">Créer</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Members management modal */}
+      {membersProject && (
+        <div className="modal-overlay" onClick={() => setMembersProject(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Membres — {membersProject.name}</h3>
+              <button className="btn-icon btn-ghost" onClick={() => setMembersProject(null)}>
+                <X size={18} />
+              </button>
+            </div>
+            <div className="members-list">
+              {membersProject.members?.map(m => {
+                const memberUser = m.user || allUsers.find(u => u._id === m.user);
+                const isOwner = (memberUser?._id || memberUser?.id) === (membersProject.owner?._id || membersProject.ownerId);
+                return (
+                  <div key={m._id} className="member-row">
+                    <div className="member-info">
+                      <div className="member-avatar">
+                        {memberUser?.firstName?.[0]?.toUpperCase() || '?'}
+                      </div>
+                      <div>
+                        <p className="member-name">
+                          {memberUser ? `${memberUser.firstName} ${memberUser.lastName}` : 'Utilisateur'}
+                        </p>
+                        <span className="member-role">
+                          {isOwner ? 'Propriétaire' : m.role === 'admin' ? 'Admin' : 'Membre'}
+                        </span>
+                      </div>
+                    </div>
+                    {!isOwner && canDelete(membersProject) && (
+                      <button
+                        className="btn-icon btn-ghost"
+                        onClick={() => handleRemoveMember(membersProject._id, memberUser?._id || memberUser?.id)}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            {canDelete(membersProject) && (() => {
+              const memberIds = membersProject.members?.map(m => {
+                const mu = m.user;
+                return mu?._id || mu?.id || m.user;
+              }) || [];
+              const availableUsers = allUsers.filter(u => !memberIds.includes(u._id));
+              if (availableUsers.length === 0) return null;
+              return (
+                <div className="add-member-section">
+                  <div className="add-member-row">
+                    <select
+                      className="input select"
+                      value={addMemberUserId}
+                      onChange={(e) => setAddMemberUserId(e.target.value)}
+                    >
+                      <option value="">Ajouter un membre...</option>
+                      {availableUsers.map(u => (
+                        <option key={u._id} value={u._id}>{u.firstName} {u.lastName}</option>
+                      ))}
+                    </select>
+                    <button
+                      className="btn btn-primary btn-sm"
+                      disabled={!addMemberUserId}
+                      onClick={() => {
+                        if (addMemberUserId) {
+                          handleAddMember(membersProject._id, addMemberUserId);
+                          setAddMemberUserId('');
+                        }
+                      }}
+                    >
+                      <UserPlus size={14} /> Ajouter
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </div>
       )}
