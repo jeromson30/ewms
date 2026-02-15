@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { Plus, ChevronLeft, ChevronRight, Phone, Calendar, Clock, Trash2, X, Pencil, Check, AlertCircle } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, Phone, Calendar, Clock, Trash2, X, Pencil, Check, AlertCircle, Users } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, addMonths, subMonths, isSameMonth, isSameDay, isWithinInterval, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -42,7 +42,7 @@ export default function PlanningPage() {
 
   const [eventForm, setEventForm] = useState({
     title: '', description: '', startDate: '', endDate: '',
-    allDay: false, type: 'other', color: '#6366f1',
+    allDay: false, type: 'other', color: '#6366f1', assignees: [],
   });
 
   const [onCallForm, setOnCallForm] = useState({
@@ -72,7 +72,7 @@ export default function PlanningPage() {
       await api.post(`/planning/${projectId}/events`, eventForm);
       await loadPlanning();
       setShowEventModal(false);
-      setEventForm({ title: '', description: '', startDate: '', endDate: '', allDay: false, type: 'other', color: '#6366f1' });
+      setEventForm({ title: '', description: '', startDate: '', endDate: '', allDay: false, type: 'other', color: '#6366f1', assignees: [] });
       showToast('Événement créé avec succès');
     } catch {
       showToast('Erreur lors de la création de l\'événement', 'error');
@@ -143,6 +143,7 @@ export default function PlanningPage() {
       allDay: ev.allDay || false,
       type: ev.type || 'other',
       color: ev.color || '#6366f1',
+      assignees: ev.assignees?.map(a => a._id || a.id) || [],
     });
   };
 
@@ -185,8 +186,9 @@ export default function PlanningPage() {
   };
 
   const openNewEventForDate = (date) => {
-    const dateStr = format(date, 'yyyy-MM-dd');
-    setEventForm({ title: '', description: '', startDate: dateStr, endDate: dateStr, allDay: false, type: 'other', color: '#6366f1' });
+    const startStr = format(date, "yyyy-MM-dd'T'09:00");
+    const endStr = format(date, "yyyy-MM-dd'T'10:00");
+    setEventForm({ title: '', description: '', startDate: startStr, endDate: endStr, allDay: false, type: 'other', color: '#6366f1', assignees: [] });
     setSelectedDate(date);
     setShowEventModal(true);
   };
@@ -212,7 +214,14 @@ export default function PlanningPage() {
           </button>
         </div>
         <div className="planning-actions">
-          <button className="btn btn-primary btn-sm" onClick={() => setShowEventModal(true)}>
+          <button className="btn btn-primary btn-sm" onClick={() => {
+            const now = new Date();
+            const startStr = format(now, "yyyy-MM-dd'T'HH:mm");
+            const endDate = new Date(now.getTime() + 60 * 60 * 1000);
+            const endStr = format(endDate, "yyyy-MM-dd'T'HH:mm");
+            setEventForm({ title: '', description: '', startDate: startStr, endDate: endStr, allDay: false, type: 'other', color: '#6366f1', assignees: [] });
+            setShowEventModal(true);
+          }}>
             <Plus size={16} /> Événement
           </button>
           <button className="btn btn-secondary btn-sm" onClick={() => setShowOnCallModal(true)}>
@@ -397,6 +406,30 @@ export default function PlanningPage() {
                     <option value="other">Autre</option>
                   </select>
                 </div>
+                <div className="form-group">
+                  <label className="form-label"><Users size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} />Participants</label>
+                  <div className="assignees-picker">
+                    {users.map(u => {
+                      const isSelected = eventForm.assignees?.includes(u._id);
+                      return (
+                        <button
+                          key={u._id}
+                          type="button"
+                          className={`assignee-chip ${isSelected ? 'selected' : ''}`}
+                          onClick={() => {
+                            const newAssignees = isSelected
+                              ? eventForm.assignees.filter(id => id !== u._id)
+                              : [...(eventForm.assignees || []), u._id];
+                            setEventForm({ ...eventForm, assignees: newAssignees });
+                          }}
+                        >
+                          <span className="assignee-chip-avatar">{u.firstName?.[0]?.toUpperCase()}</span>
+                          {u.firstName} {u.lastName}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
                 <div className="modal-actions">
                   <button type="button" className="btn btn-secondary" onClick={() => setEditMode(false)}>Annuler</button>
                   <button type="submit" className="btn btn-primary">Enregistrer</button>
@@ -420,6 +453,19 @@ export default function PlanningPage() {
                     {format(parseISO(selectedEvent.endDate), 'dd MMM yyyy HH:mm', { locale: fr })}
                   </span>
                 </div>
+                {selectedEvent.assignees?.length > 0 && (
+                  <div className="event-detail-row">
+                    <Users size={14} className="text-muted" />
+                    <div className="event-detail-assignees">
+                      {selectedEvent.assignees.map(a => (
+                        <span key={a._id || a.id} className="assignee-badge">
+                          <span className="assignee-badge-avatar">{a.firstName?.[0]?.toUpperCase()}</span>
+                          {a.firstName} {a.lastName}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {selectedEvent.createdBy && (
                   <div className="event-detail-row">
                     <span className="text-sm text-muted">
@@ -484,6 +530,30 @@ export default function PlanningPage() {
                   <option value="oncall">Astreinte</option>
                   <option value="other">Autre</option>
                 </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label"><Users size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} />Participants</label>
+                <div className="assignees-picker">
+                  {users.map(u => {
+                    const isSelected = eventForm.assignees?.includes(u._id);
+                    return (
+                      <button
+                        key={u._id}
+                        type="button"
+                        className={`assignee-chip ${isSelected ? 'selected' : ''}`}
+                        onClick={() => {
+                          const newAssignees = isSelected
+                            ? eventForm.assignees.filter(id => id !== u._id)
+                            : [...(eventForm.assignees || []), u._id];
+                          setEventForm({ ...eventForm, assignees: newAssignees });
+                        }}
+                      >
+                        <span className="assignee-chip-avatar">{u.firstName?.[0]?.toUpperCase()}</span>
+                        {u.firstName} {u.lastName}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
               <div className="modal-actions">
                 <button type="button" className="btn btn-secondary" onClick={() => setShowEventModal(false)}>Annuler</button>
